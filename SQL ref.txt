@@ -1,0 +1,280 @@
+SQL, 'Structured Query Language'
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE Table
+
+	CREATE TABLE celebs (id INTEGER, name TEXT, age INTEGER);
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO
+
+	INSERT INTO celebs(id,name,age) VALUES (2,'Beyonce Knowles', 33);
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+UPDATE
+
+	UPDATE celebs SET age = 22 WHERE id = 1; 
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ALTER TABLE (ADD COLUMN) 
+
+	ALTER TABLE celebs ADD COLUMN twitter_handle TEXT; 
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+DELETE FROM  (ROW)
+
+	DELETE FROM celebs WHERE twitter_handle IS NULL;
+
+- DELETE all rows that have a null value in the twitter column.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT DISTINCT
+
+	SELECT DISTINCT genre FROM movies;
+
+- SELECT DISTINCT is used to return unique values in the result set. It filters out all duplicate values.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+OPERATORS
+
+	= equals
+	!= not equals
+	> greater than
+	< less than
+	>= greater than or equal to
+	<= less than or equal to
+	
+ - LIKE is a special operator used with the WHERE clause to search for a specific pattern in a column
+
+	SELECT * FROM movies WHERE name LIKE 'Se_en';
+ 
+ - name LIKE Se_en is a condition evaluating the name column for a specific pattern.
+ - Se_en represents a pattern with a wildcard character. 
+   The _ means you can substitute any individual character here without breaking the pattern. 
+   The names Seven and Se7en both match this pattern.
+
+WILD CARD % used with LIKE
+
+	SELECT * FROM movies WHERE name LIKE 'A%';
+
+  - This statement filters the result set to only include movies with names that begin with the letter "A"
+  - % is a wildcard character that matches zero or more missing letters in the pattern.
+  - A% matches all movies with names that begin with "A"
+  - %a matches all movies that end with "a"
+
+
+	SELECT * FROM movies WHERE name LIKE '%man%';
+
+  - You can use % both before and after a pattern. 
+  - Here, any movie that contains the word "man" in its name will be returned in the result set. 
+    Notice, that LIKE is not case sensitive. "Batman" and "Man Of Steel" both appear in the result set.	
+
+
+BETWEEN is another special operator that can be used in a WHERE clause
+
+	SELECT * FROM movies WHERE name BETWEEN 'A' AND 'J';
+
+  - This statement filters the result set to only include movies with names that begin with letters "A" up to but not including "J".
+
+	SELECT * FROM movies WHERE year BETWEEN 1990 AND 2000;
+
+  - In this statement, the BETWEEN operator is being used to filter the result set to only include movies with years between 1990 up to and including 2000.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ORDER BY
+
+
+	SELECT * FROM movies ORDER BY imdb_rating DESC;
+
+  - ORDER BY is a clause that indicates you want to sort the result set by a particular column either alphabetically or numerically.
+  - imdb_rating is the name of the column that will be sorted.
+  - DESC is a keyword in SQL that is used with ORDER BY to sort the results in descending order (high to low or Z-A). 
+    ASC is a keyword in SQL that is used with ORDER BY to sort the results in ascending order (low to high or A-Z).
+ 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+LIMIT
+
+	SELECT * FROM moviesORDER BY imdb_rating DESC LIMIT 3;
+
+  - LIMIT is a clause that lets you specify the maximum number of rows the result set will have. 
+  - Here, we specify that the result set can not have more than three rows.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Aggregate functions   (   AVG() / COUNT() / FIRST() / LAST() / MAX() / MIN() / SUM()  )
+
+ - SQL aggregate functions return a single value, calculated from values in a column.
+ - Aggregate functions compute a single result from a set of input values.
+   For instance, when we need the sum or average of a particular column, we can use aggregate functions to quickly compute it for us.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+COUNT ( Aggregate function  )
+
+	SELECT COUNT(*) FROM fake_apps;
+
+   - The fastest way to calculate the number of rows in a table is to use the COUNT() function.
+   - COUNT() is a function that takes the name of a column as an argument and counts the number of rows where the column is not NULL. 
+     Here, we want to count every row so we pass * as an argument.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+GROUP BY
+
+ - GROUP BY is a clause in SQL that is only used with aggregate functions. 	
+ - It is used in collaboration with the SELECT statement to arrange identical data into groups.
+
+	SELECT price, COUNT(*) FROM fake_apps GROUP BY price;
+
+              | price | count(*) |
+              | 0.99  |    73    |
+              | 1.99  |    43    |
+         
+   - Here, our aggregate function is COUNT() and we are passing price as an argument to GROUP BY. 
+     SQL will count the total number of apps for each price in the table.
+   
+   - It is usually helpful to SELECT the column you pass as an argument to GROUP BY. Here we select price and COUNT(*). 
+     You can see that the result set is organized into two columns making it easy to see the number of apps at each price.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SUM ( Aggregate function  )
+
+ - SQL makes it easy to add all values in a particular column using SUM().
+ - SUM() is a function that takes the name of a column as an argument and returns the sum of all the values in that column. 
+
+	SELECT SUM(downloads) FROM fake_apps;
+
+             | SUM(downloads) |
+             |    3322760     |		    
+    
+   - Here, it adds all the values in the downloads column.	
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+MAX ( Aggregate function  )
+
+ - You can find the largest value in a column by using MAX().
+ - MAX() is a function that takes the name of a column as an argument and returns the largest value in that column. 
+
+	SELECT MAX(downloads) FROM fake_apps;
+
+             | MAX(downloads) |
+             |    9999        |	
+
+   - Here, we pass downloads as an argument so it will return the largest value in the downloads column.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+MIN ( Aggregate function  )
+
+ - Similar to MAX(), SQL also makes it easy to return the smallest value in a column by using the MIN() function.
+ - MIN() is a function that takes the name of a column as an argument and returns the smallest value in that column. 
+
+	SELECT MIN(downloads) FROM fake_apps;
+
+             | MIN(downloads) |
+             |     100        |	
+
+    - Here, we pass downloads as an argument so it will return the smallest value in the downloads column.
+
+
+
+	SELECT name, category, MIN(downloads) FROM fake_apps
+	GROUP BY category;
+
+            | name | category | MIN(downloads) |
+            |  A   |   books  |       1713     |
+            |  B   |   games  |       2791     |
+
+    - Return the names of the apps that have been downloaded the least number of times in each category.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+AVG ( Aggregate function  )
+
+ - SQL uses the AVG() function to quickly calculate the average value of a particular column.
+ - The AVG() function works by taking a column name as an argument and returns the average value for that column.
+
+	SELECT AVG(downloads) FROM fake_apps;
+  
+             | AVG(downloads) |
+             |     16613.8    |	
+
+    - This statement returns the average number of downloads for an app in our database.
+
+
+	SELECT price, AVG(downloads) FROM fake_apps
+        GROUP BY price;
+
+             | price | AVG(downloads) |
+             |  0.99 |  1565.2602     |
+             |  1.99 |  1435.5116     |
+
+     - Calculate the average number of downloads at each price. 
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ROUND
+
+ - ROUND() is a function that takes a column name and an integer as an argument. 
+ - It rounds the values in the column to the number of decimal places specified by the integer. 
+
+	SELECT price, ROUND(AVG(downloads), 2) FROM fake_apps
+	GROUP BY price;
+
+             | price | ROUND(AVG(downloads), 2) |
+             | 0.99  |         15672.26         |
+             | 1.99  |         15971.51         |
+
+     - Here, we pass the column AVG(downloads) and 2 as arguments. 
+     - SQL first calculates the average for each price and then rounds the result to two decimal places in the result set.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INNER JOIN  ( PS! INNER JOIN is the same as JOIN. )
+
+ -  inner join will combine rows from different tables if the join condition is true.
+
+	SELECT column_name(s)
+	FROM table1
+	JOIN table2
+	ON table1.column_name = table2.column_name;
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+LEFT JOIN ( PS! In some databases LEFT JOIN is called LEFT OUTER JOIN. )
+
+ - Outer joins also combine rows from two or more tables, but unlike inner joins, 
+   they do not require the join condition to be met.
+
+ - Instead, every row in the left table(1st table) is returned in the result set, and if the join condition is not met, 
+   then NULL values are used to fill in the columns from the right table(2nd table).
+
+	SELECT column_name(s)
+	FROM table1
+	LEFT JOIN table2
+	ON table1.column_name=table2.column_name;
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+AS 
+
+ - AS is a keyword in SQL that allows you to rename a column or table using an alias. 
+
+	SELECT column_name AS secret_column FROM table_name;
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

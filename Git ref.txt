@@ -1,0 +1,52 @@
+GIT REF
+
+ WORKING DIRECTORY   ----->   STAGING AREA   -------->  REPOSITORY
+
+
+git init              ---> creates a new Git repository
+git status            ---> inspects the contents of the working directory and staging area
+git add               ---> adds files from the working directory to the staging area
+git diff (q to exit)  ---> shows the difference between the working directory and the staging area
+git commit            ---> permanently stores file changes from the staging area in the repository
+git log               ---> shows a list of all previous commits
+
+
+  HEAD --> In many cases, the most recently made commit is the HEAD commit.
+
+git show HEAD                ---> to see the HEAD commit
+git checkout HEAD filename   ---> restore the file in working directory to look exactly as it did on last commit.
+git reset HEAD filename      ---> resets the file in the staging area to be the same as the HEAD commit. It removes them from the staging area
+
+----------------------------------------------------------------------------------------------------------
+git reset commit_SHA (first_7_characters_SHA)  ---> go back to previous commit
+
+ex: 
+    commit 83f7b3591f4ab7aedb3160388b59e65ee1cd94a2 (check using "git log")
+
+    git reset 83f7b35
+----------------------------------------------------------------------------------------------------------
+
+git branch                ----> check what branch you are currently on.
+git branch new_branch     ----> create a new branch called "new_branch"
+git checkout branch_name  ----> to switch to an existing branch.
+git branch -d branch_name ----> Delete the branch
+
+git merge branch_name     ----> Merge the two branches. branch_name is th giver branch while the receiver is the branch you are currently on.
+
+
+
+----------------------------------------------------------------------------------------------------------
+GIT CLONE
+git clone remote_location clone_name    ---> create a clone of a git project.
+
+ -remote_location tells Git where to go to find the remote. This could be a web address, or a filepath.
+ -clone_name is the name you give to the directory in which Git will clone the repository.
+
+
+git fetch                    --->  Fetches work from the remote into the local copy branch origin/master.Your local master branch has not been updated yet
+ 
+git merge origin/master      --->  Merges origin/master into your local branch (use this command after git fetch).
+
+
+git push origin branch_name  ---> will push your branch up to the remote.
+----------------------------------------------------------------------------------------------------------

@@ -1,0 +1,298 @@
+string.is_a? Integer  === checks if integer
+string.is_a? Symbol === checks if symbol
+
+
+-----PUTS AND PRINT----------------------------------------------------------------------------
+
+print "string"  -- The print command just takes whatever you give it and prints it to the screen
+
+puts "string" -- Similar to print command except that it adds a new line after
+
+------------------------------------------------------------------------------------------------
+
+---------------ASSIGNMENT OPERATOR---------------------------------------
+
+num = 1
+num += 1   (instead of num = num + 1)
+# num == 2
+
+# you can also use -=, *=, /=
+
+-------------------------------------------------------------------------
+
+
+----------IF AND UNLESS --------------------------------------------------
+wow = 'cool'
+if wow == 'cool'
+	puts 'cool'
+elseif wow == 'nice'
+	puts 'nice'
+else
+	puts 'aw'
+end
+
+----> cool
+
+hungry = false
+
+unless hungry
+  puts "I'm writing Ruby programs!"
+else
+  puts "Time to eat!"
+end
+
+----> I'm writing Ruby programs!
+
+
+problem = false
+print "Good to go!" unless problem
+
+----> Good to go!
+
+
+---------------------------------------------------------------------
+
+
+--------LOOP---------------------------------------------------------
+
+#WHILE
+i = 0
+while i < 5
+  print i
+  i = i + 1;
+end
+------> 01234
+
+#UNTIL
+counter = 1
+until counter > 10
+  print counter
+  counter += 1
+  
+end
+------> 12345678910
+
+#FOR
+for num in 1..15  (3 dot means to exclude the final number in the count. ex:  1...15 )
+  print num
+end
+------> 12345678910111213141515 1..15
+
+
+#Loop
+ 
+i = 20
+loop do
+  i -= 1
+  print "#{i}"
+  break if i <= 0
+end
+------>  191817161514131211109876543210
+
+Loop controls
+
+ next if i == 2  (skip over certain steps in the loop) 
+ break if i == 2  (end the loop)
+---------------------------------------------------------------------
+
+
+
+
+---------ASSIGNING BOOLEAN VARIABLES WITH STYLE-----------------------
+
+test_1 = 77 != 77
+# test_1 = false
+
+test_2 = -4 <= -4
+# test_2 = true
+
+test_3 = -44 < -33
+# test_3 = true
+
+test_4 = 100 == 1000
+# test_4 = false
+
+
+boolean_1 = 77 < 78 && 77 < 77
+# boolean_1 = false
+
+boolean_2 = true && 100 >= 100
+# boolean_2 = true
+
+boolean_3 = 2**3 == 8 && 3**2 == 9
+# boolean_3 = true
+
+--OR
+boolean_1 = 2**3 != 3**2 || true
+# boolean_1 = true
+
+boolean_2 = false || -10 > -9
+# boolean_2 = false
+
+boolean_3 = false || false
+# boolean_3 = false
+
+
+--NOT
+boolean_1 = !true
+# boolean_1 = false
+
+boolean_2 = !true && !true
+# boolean_2 = false
+
+boolean_3 = !(700 / 10 == 70)
+# boolean_3 = false
+
+
+--------------------------------------------------------------
+
+
+
+
+-------LENGTH METHOD-------------------------------------------
+
+"STRING".length   ------>   6
+---------------------------------------------------------------
+
+-------- REVERSE METHOD----------------------------------------
+
+"STRING".reverse   -------->   "GNIRTS"
+---------------------------------------------------------------
+
+
+---------'.upcase' & '.downcase'------------------------------
+
+"STRING".upcase and "STRING".downcase methods convert a string to ALL UPPER CASE or all lower case, respectively.
+
+--------------------------------------------------------------
+
+
+Class variables are like instance variables, 
+but instead of belonging to an instance of a class, 
+they belong to the class itself. 
+Class variables always start with two @s, like so: @@files.
+
+Global variables can be declared in two ways. 
+The first is one that's already familiar to you: 
+you just define the variable outside of any method or class, and voila! It's global. 
+If you want to make a variable global from inside a method or class, just start it with a $, like so: $matz.
+
+
+----------------------------------------
+If you want a variable to contain a literal backslash, single quotes make it easier:
+
+>> '\n'       # A literal 'backslash n' combination
+=> "\\n"
+
+>> 'Newlines (\n) and tabs (\t) both use the backslash character \.'
+=> "Newlines (\\n) and tabs (\\t) both use the backslash character \\."
+----------------------------------------
+
+
+---------------------set variable = "wow" unless that variable != nil------------------------
+ @variable = @variable || "wow"    shortcut------>     @variable ||= "wow"
+--------------------------------------------------------------------------------------------
+
+-------Sort decending----------------------------------
+
+fruits = ["orange", "apple", "banana", "pear", "grapes"]
+#decending sort
+fruits.sort! do |first, second|
+    second <=> first 
+    
+end
+-------------------------------------------------------
+
+
+
+---------Sort method(w/ reverse)----------------------------
+
+def alphabetize(arr, rev=false)
+  
+   if rev == true
+       arr.reverse!
+       
+   else
+       arr.sort!
+   end
+       
+end
+
+numbers = [3,5,6,7,4,1,2]
+
+puts alphabetize(numbers)
+-------------------------------------------------------------
+
+-------------------ITERATE OVER HASHES------------------------
+
+matz = { "First name" => "Yukihiro",
+  "Last name" => "Matsumoto",
+  "Age" => 47,
+  "Nationality" => "Japanese",
+  "Nickname" => "Matz"
+}
+
+
+matz.each {
+    |key, value|
+    
+    puts value
+    }
+----------------------------------------------------------------
+
+-----------------NEW HASH------------------------------------------------
+no_nil_hash = Hash.new("wow")
+#if you try to access a nonexistent key,you'll get "wow" as a result.
+ex: no_nil_hash[key1]
+-------------------------------------------------------------------------
+
+
+--------------TERNARY CONDITIONAL EXPRESSION------------------------------
+wow = false
+
+puts wow ? "wow is true" : "wow is false"
+#wow is false
+
+--------------------------------------------------------------------------
+
+
+-----------------CONDITIONAL ASSIGNMENT-----------------------------------
+favorite_book = nil
+puts favorite_book
+
+favorite_book ||= "Cat's Cradle"
+puts favorite_book
+
+# variable_name ||= values (Will assign the values if variable_name is nil(nothing))
+--------------------------------------------------------------------------
+
+
+
+------------------CONCATENATION OPERATOR-------------------------------------
+alphabet = ["a", "b", "c"]
+alphabet << "d" # Update me!
+
+caption = "A giraffe surrounded by "
+caption << "weezards!" # Me, too!
+
+-----------------------------------------------------------------------------
+
+
+
+----------------Proc--------------------------
+proc_test = Proc.new {|x| puts x}
+
+array.collect(&proc_test)
+----------------------------------------------
+
+----------------lambda------------------------
+my_array = ["raindrops", :kettles, "whiskers", :mittens, :packages]
+
+# Add your code below!
+symbol_filter = lambda {|string| string.is_a?Symbol} #string.is_a?Symbol = checks if symbol
+
+symbols = my_array.select(&symbol_filter)
+
+-----------------------------------------------
+
+
