@@ -1,0 +1,111 @@
+MaxCDN:
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+--------------------------------------------------------------------------------------------------------------------------
+
+Containers
+
+Bootstrap requires a containing element to wrap site contents.
+
+There are two container classes to choose from:
+
+The .container class provides a responsive fixed width container
+The .container-fluid class provides a full width container, spanning the entire width of the viewport
+
+Ex:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container"> OR <div class="container-fluid">
+  <h1>WOW</h1>
+  <p>WOW</p> 
+</div>
+
+</body>
+</html>
+
+--------------------------------------------------------------------------------------------------------------------------
+Grid Classes
+The Bootstrap grid system has four classes:
+
+xs (for phones)
+sm (for tablets)
+md (for desktops)
+lg (for larger desktops)
+
+Ex:
+
+<div class="row">
+  <div class="col-sm-4">.col-sm-4</div>
+  <div class="col-sm-4">.col-sm-4</div>
+  <div class="col-sm-4">.col-sm-4</div>
+</div>
+
+--------------------------------------------------------------------------------------------------------------------------
+Some Typography  (http://www.w3schools.com/bootstrap/bootstrap_ref_css_text.asp)
+
+<small>        used to create a lighter, secondary text in any heading:
+
+<mark>         marks the element.
+
+<abbr>         abbr the element.
+
+<blockquote>   
+<blockquote class="blockquote-reverse">
+
+<dl>           The dl element indicates a description list
+<code>         Inline snippets of code should be embedded in the code element
+<kbd>          To indicate input that is typically entered via the keyboard, use the kbd element
+<pre>          Text in a pre element is displayed in a fixed-width font, and it preserves both spaces and line breaks
+
+Contextual Colors
+
+  <p class="text-muted">This text is muted.</p>
+  <p class="text-primary">This text is important.</p>
+  <p class="text-success">This text indicates success.</p>
+  <p class="text-info">This text represents some information.</p>
+  <p class="text-warning">This text represents a warning.</p>
+  <p class="text-danger">This text represents danger.</p>
+
+Contextual Backgrounds
+
+  <p class="bg-primary">This text is important.</p>
+  <p class="bg-success">This text indicates success.</p>
+  <p class="bg-info">This text represents some information.</p>
+  <p class="bg-warning">This text represents a warning.</p>
+  <p class="bg-danger">This text represents danger.</p>
+
+--------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

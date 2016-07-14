@@ -4,6 +4,7 @@ HTML   Hypertext Markup Language   「ctr + 0 = default zoom of the browser」
 <html>
 	<head>
 		<title>My Title</title>
+		<meta charset="UTF-8">
 	</head>
 
 	<body>
@@ -127,9 +128,34 @@ Put this on html file between <head>................</head>
 - A rel attribute that should always be equal to "stylesheet"
 - A href attribute that should point to the web address of your CSS file
 
+In CSS, size can be assigned in pixels (px), rems, or ems.
 
-「*」selector
+   * pixel (px) -->  Standard unit of measurement for sizing fonts and other HTML elements
+
+   * rem        -->  On most web browsers, 1rem is equivalent to 16px, 2rem is equivalent to 32px (a doubling), 3rem is                          equivalent to 48px (a tripling) and so on.
+
+   * em         -->  A relative value that changes in proportion to the size of the parent element. For example, if a                            parent element has font-size: 20px;, child elements with font-size: 1em; would be equivalent to 20px.                       Child elements with font-size: 0.5em; would be equivalent to 10px (a halving) and so on.
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Box Model
+
+			-----------------------------|
+                                   margin            |
+                           -----------------------|  |
+		        	   border         |  |
+                            --------------------| |  |
+				   padding      | |  |
+                                -------------|  | |  |
+				   CONTENT   |  | |  |
+                                -------------|  | |  |
+                     	                        | |  |
+                            --------------------| |  |
+		           	                  |  |
+                           -----------------------|  |
+                                                     |
+                        -----------------------------|
+
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 CSS Comment
 
