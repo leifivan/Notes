@@ -1,0 +1,260 @@
+HTML   Hypertext Markup Language   「ctr + 0 = default zoom of the browser」
+---------------------Start-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>My Title</title>
+	</head>
+
+	<body>
+		<!--
+		Comment
+		--> 
+
+	</body>
+
+</html>
+---------------------Start-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Tag styles
+ex:
+<p style="color: brown; font-size: 15px; font-family: Arial; background-color: red"> wow </p>
+
+color: brown
+font-size: 15px
+font-family: Arial
+background-color: red
+text-align: center/left/right
+border: solid/dotted/dashed/2px
+border-color: 
+border-width: (x)px
+border-radius: 100%(circle)
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Tags:
+
+Image     <img src= "website URL" />
+ex:
+	  <img src= "google.com" />
+
+Video
+<video width="320" height="240" controls>
+  <source src="video-url.mp4" type="video/mp4">
+</video>
+
+width and height: Set the size of the screen that displays the video.
+
+controls: Adds play, pause and volume control.
+
+source src: Sets the URL of the video to play.
+
+type: Specifies different video formats.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Table
+	<table>
+		<thead>
+			<tr>
+				<th colspan = "2"> Title </th>
+			</tr>
+		</thead>
+
+		<tbody>
+			<tr>
+				<td> item 1 </td>
+				<td> item 2 </td>			
+
+			</tr>
+		</tbody>
+
+	</table>
+
+colspan attribute (colspan = "2") = table cells take up 1 column by default. Setting colspan attribute can change that.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Div   <div>   </div>
+
+	<div style = "background-color: yellow; width: 50px; height: 50px">   </div>
+
+allows you to divide your page into containers (that is, different pieces). 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Span  <span>    </span>
+
+		<p>Hahahaha this is <span style="color: red">red</span>   </p>
+
+While <div> allows you to divide your webpage up into pieces you can style individually, <span> allows you to control styling for smaller parts of your page, such as text. 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Link      <a href="URL of the destination">click here</a>
+ex:		
+   	  <a href="http://www.yahoo.com">yahoo</a>	
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Ordered List
+<ol>
+	<li>1</li>		1. 1
+	<li>2</li>		2. 2
+
+</ol>
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Uordered List
+<ul>
+	<li>1</li>		* 1
+	<li>2</li>		* 2
+</ul>
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Bold  <strong> </strong>
+ex:
+<p> wow this word is bold</p>  ---->          <p> <strong>wow</strong> this word is bold </p>
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+italicize words for emphasis    <em> </em>
+ex:
+	<p>Hey, don't say <em>that</em>!</p>
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CSS  Cascading Style Sheet
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Put this on html file between <head>................</head>
+
+	<link type="text/css" rel="stylesheet" href="stylesheet.css"/>
+
+- A type attribute that should always be equal to "text/css"
+- A rel attribute that should always be equal to "stylesheet"
+- A href attribute that should point to the web address of your CSS file
+
+
+「*」selector
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CSS Comment
+
+/*  I'm a comment!  */
+
+text-decoration: none;  (for link(<a></a>)'s underline)
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Selector   nested elements
+
+	<div>
+		<div>
+			<p></p>
+		</div>
+	</div>	
+
+div div p{
+
+	/* styles here */
+
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Pseudo-class _selector
+
+selector:pseudo-class_selector{
+	property;value;
+	}
+ex:
+	a:hover{
+		color: #00FF00;
+	}
+
+
+
+pseudo-class_selector list:
+- first-child (styling only the elements that are the first children of their parents.)
+ex:
+
+   p:first-child {
+
+   	color: red;
+   }
+
+- nth-child(x) (select any child of an element after the first child)
+ex:
+
+  p:nth-child(2) {
+        color: red;
+   }
+
+
+- hover     (mouse over link)
+- link	    (unvisited link)
+- visited   (visited link)
+- active    (selected link, on-clicked)
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Display property   (display: block/inline-block/inline/none;)
+
+- block: This makes the element a block box. It won't let anything sit next to it on the page! It takes up the full width.
+
+- inline-block: This makes the element a block box, but will allow other elements to sit next to it on the same line.
+
+- inline: This makes the element sit on the same line as another element, but without formatting it like a block. It only takes up as much width as it needs (not the whole line).
+
+- none: This makes the element and its content disappear from the page entirely! Including any children and any content.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Margin    
+
+- auto (margin: auto;) : Tells the document to automatically put equal left and margins on our element, centering it on the page.
+
+
+If you want to specify a particular margin, you can do it like this:
+
+	margin-top: /*some value*/
+	margin-right: /*some value*/
+	margin-bottom: /*some value*/
+	margin-left: /*some-value*/
+
+You can also set an element's margins all at once: you just start from the top margin and go around clockwise (going from top to right to bottom to left). 
+For instance,
+
+	margin: 1px 2px 3px 4px;
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Padding
+
+- The padding is the space between your border and your innermost layer: the actual content.
+
+- Padding can be set in two ways, just like your margins. You can either select them individually, like this:
+
+	padding-top: /*some value*/
+	padding-right: /*some value*/
+	padding-bottom: /*some value*/
+	padding-left: /*some-value*/
+
+- Or select them all in one declaration, like this:
+
+	padding: value value value value;
+
+- padding: 10px will give your HTML element 10 pixels of padding on all sides.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Float -wrap text around image
+
+	float: right/left;
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Positioning type  (position: absolute/relative/fixed;)
+  - If you don't specify an element's positioning type, it defaults to STATIC.  
+
+  - absolute: When an element is set to position: absolute, it's then positioned in relation to the first parent element it has that doesn't have position: static. If there's no such element, the element with position: absolute gets positioned relative to <html>.
+  - relative: it tells the element to move relative to where it would have landed if it just had the default static positioning.
+  - fixed: anchors an element to the browser window - you can think of it as gluing the element to the screen. If you scroll up and down, the fixed element stays put even as other elements scroll past.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Z-INDEX (z-index)
+
+	- You can think of the z-index as a measure of importance: the higher an element's z-index, 
+	  the higher it will be "stacked" on the page. Giving your header a z-index of 1 while not giving any of the 
+	  other elements a z-index ensures that your header will sit "on top of" your other elements and won't get stuck 
+	  behind them.
+
+
+
+
+
+
+

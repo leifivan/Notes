@@ -10,6 +10,7 @@ git diff (q to exit)  ---> shows the difference between the working directory an
 git commit            ---> permanently stores file changes from the staging area in the repository
 git log               ---> shows a list of all previous commits
 
+touch .gitignore      ---> Create a local .gitignore
 
   HEAD --> In many cases, the most recently made commit is the HEAD commit.
 
