@@ -1,0 +1,1768 @@
+Laravel Framework version 5.3.21
+
+Server = php artisan serve
+         php artisan serve --port=8001
+
+Create new project = laravel new project_name
+
+
+(like bundle update in rails) = composer update
+
+
+-------------list of all available commands-------------------------------------------------------------------------------------------------------
+
+	php artisan list
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------------Simple data retrieving shit----------------------------------------------------------------------------------------------------------
+
+* php artisan make:model Product -m                ----> the -m is to tell you also want to create migration file for that model
+                                                   ----> created file(s):
+
+                                                  		- app/Product.php
+                                                                - database/migrations/xxxx_xx_xx_xxxxxxx_create_products_table.php
+
+* php artisan make:seed ProductTableSeeder         ----> created file(s):
+                                                          
+                                                  		- database/seeds/ProductTableSeeder.php
+
+* php artisan make:controller ProductController    ----> created file(s):      
+
+								- app/Http/Controllers/ProductController.php       
+                                                         
+                                 
+--database/migrations/xxxx_xx_xx_xxxxxx_create_products_table.php
+
+    	public function up()
+    
+	{
+        
+		Schema::create('products', function (Blueprint $table) {
+            
+			$table->increments('id');
+            
+			$table->timestamps();
+            
+			$table->string('imagePath');
+            
+			$table->string('title');
+            
+			$table->text('description');
+            
+			$table->integer('price');
+        });
+    
+        }
+
+--app/Product.php
+
+	class Product extends Model
+	{
+    
+		protected $fillable = ['imagePath', 'title', 'description','price'];
+	
+}
+
+
+--database/seeds/ProductTableSeeder.php
+
+    	public function run()
+    
+	{
+      
+		$product = new \App\Product([
+        
+			'imagePath' => 'http://www.thealmightyguru.com/Reviews/HarryPotter/Images/Cover-GobletOfFire.jpg',
+        
+			'title' => 'Harry Potter',
+        
+			'description' => 'Super cool - at least for a child.',
+        
+			'price' => 10
+      ]);
+      
+		$product->save();
+        }
+
+
+
+
+--routes/web.php
+
+	Route::get('/', [
+    
+			'uses' => 'ProductController@getIndex',
+    
+			'as' => 'product.index'
+]);
+
+--app/http/controllers/ProductController
+
+        use App\Product;     
+
+	class ProductController extends Controller
+{
+    
+		public function getIndex()
+    {
+      
+			$products = Product::all();
+      
+			return view('shop.index',['products' => $products]);
+
+    
+		}
+
+	}
+
+
+--resources/views/shop/index.blade.php
+
+	@foreach($products as $product)
+		{{ $product->title}}
+                {{ $product->imagePath}}
+		{{ $product->description}}
+		{{ $product->title}}
+		{{ $product->price}}
+        @endforeach
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+-------------Simple User signup shit-------------------------------------------------------------------------------------------------------------
+
+
+
+--default laravel user model (app/User.php)
+
+--database/migrations/xxxx_xx_xxxxxx_create_user_table.php
+
+    	public function up()
+
+	{
+      
+		Schema::create('users', function (Blueprint $table) {
+          
+			$table->increments('id');
+          
+			$table->timestamps();
+          
+			$table->string('email')->unique();
+          
+			$table->string('password');
+      
+		});
+    
+	}
+
+
+--routes/web.php
+
+	Route::get('/signup', [
+    
+		'uses' => 'UserController@getSignup',
+    
+		'as' => 'user.signup'
+]);
+
+	
+
+Route::post('/signup', [
+    
+		'uses' => 'UserController@postSignup',
+    
+		'as' => 'user.signup'
+]);
+
+--app/Http/Controllers/UserController.php
+
+	use App\User;
+
+
+
+	class UserController extends Controller
+	
+{
+    
+		public function getSignup()
+		{
+      
+			return view('user.signup');
+    
+		}
+
+    
+
+		public function postSignup(Request $request)
+		{
+      
+			$this->validate($request, [
+        
+					'email' => 'email|required|unique:users',
+        
+					'password' => 'required|min:4'
+      ]);
+      
+			$user = new User([
+        
+				'email' => $request->input('email'),
+        
+				'password' => bcrypt($request->input('password'))
+      ]);
+      
+			$user->save();
+      
+			return redirect()->route('product.index');
+    
+		}
+
+	}
+
+--resources/views/user/signup.blade.php
+
+<div class="row">
+  <div class = "col-md-4 col-md-offset-4">
+    <h1>Sign up</h1>
+    @if(count($errors) > 0)
+      <div class="alert alert-danger">
+          @foreach($errors->all() as $error)
+          <p>{{$error}}</p>
+          @endforeach
+      </div>
+    @endif
+    <form action"{{ route('user.signup') }}" method="post">
+      <div class="form-group">
+        <label for="email">E-Mail</label>
+        <input type="text" id="email" name="email" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control">
+      </div>
+      <button type="submit" class="btn btn-primary">Sign up </button>
+      {{ csrf_field() }}
+
+    </form>
+  </div>
+
+</div>
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+-------------Simple User signin shit-------------------------------------------------------------------------------------------------------------
+
+--default laravel user model (app/User.php)
+
+
+--database/migrations/xxxx_xx_xxxxxx_create_user_table.php
+
+    	public function up()
+
+	{
+      
+		Schema::create('users', function (Blueprint $table) {
+          
+			$table->increments('id');
+          
+			$table->timestamps();
+          
+			$table->string('email')->unique();
+          
+			$table->string('password');
+      
+		});
+    
+	}
+
+
+--routes/web.php
+
+	Route::get('/signin', [
+    
+			'uses' => 'UserController@getSignin',
+    
+			'as' => 'user.signin'
+]);
+
+	
+
+Route::post('/signin', [
+    
+			'uses' => 'UserController@postSignin',
+    
+			'as' => 'user.signin'
+]);
+
+
+
+	Route::get('/user/profile', [
+    
+			'uses' => 'UserController@getProfile',
+    
+			'as' => 'user.profile'
+
+]);
+
+--app/Http/Controllers/UserController.php
+
+
+	use App\User;
+
+
+
+	class UserController extends Controller
+	
+{
+    
+		public function getSignup()
+		{
+      
+			return view('user.signup');
+    
+		}
+
+    
+
+		public function postSignup(Request $request)
+		{
+      
+
+    			public function getSignin()
+			{
+      
+				return view('user.signin');
+    
+			}
+
+    
+
+		public function postSignin(Request $request)
+		{
+      
+			$this->validate($request, [
+        
+					'email' => 'email|required',
+        
+					'password' => 'required|min:4'
+      ]);
+      
+			if (Auth::attempt(['email' => $request->input('email'), 'password' => $request->input('password') ]))
+			{
+        
+				return redirect()->route('user.profile');
+      
+			}
+      
+			return redirect()->back();
+    
+		}
+
+    
+
+		public function getProfile()
+		{
+      
+			return view('user.profile');
+    
+		}
+
+	}
+
+
+--resources/views/user/signin.blade.php
+
+<div class="row">
+  <div class = "col-md-4 col-md-offset-4">
+    <h1>Sign In</h1>
+    @if(count($errors) > 0)
+      <div class="alert alert-danger">
+          @foreach($errors->all() as $error)
+          <p>{{$error}}</p>
+          @endforeach
+      </div>
+    @endif
+    <form action"{{ route('user.signin') }}" method="post">
+      <div class="form-group">
+        <label for="email">E-Mail</label>
+        <input type="text" id="email" name="email" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control">
+      </div>
+      <button type="submit" class="btn btn-primary">Sign In </button>
+      {{ csrf_field() }}
+
+    </form>
+  </div>
+
+</div>
+
+--resources/views/user/profile.blade.php
+
+<div class="row">
+  <div class = "col-md-4 col-md-offset-4">
+    <h1>User Profile</h1>
+  </div>
+
+</div>
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+stopped at Laravel 5.2 PHP - Build a Shopping Cart - #11
+
+
+
+-------------CSRF Protection----------------------------------------------------------------------------------------------------------------------
+
+Any HTML forms pointing to POST, PUT, or DELETE routes that are defined in the web routes file should include a CSRF token field. 
+Otherwise, the request will be rejected.
+
+	<form method="POST" action="/profile">
+    		{{ csrf_field() }}
+    		...
+	</form>
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------------Storing object in the database-------------------------------------------------------------------------------------------------------
+
+serialize()
+	- note that this is php function, not laravel's
+	- converts object to string
+
+unserialize()
+	- coverts the serialized string to get the old object
+
+
+	$order = new Order();
+	$order->cart = serialize($cart);
+
+
+	
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------------Controller---------------------------------------------------------------------------------------------------------------------------
+
+-----Create controller
+
+	php artisan make:controller Hello
+
+     - will create controller at: /app/Http/Controllers/Hello.php
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+------------Routes--------------------------------------------------------------------------------------------------------------------------------
+  
+--simple route setup
+
+      /routes/web.php
+
+	Route::get('/user/{id}',[
+   
+          	'uses' => 'UserController@getUser',
+    
+          	'as' => 'user.get'
+]);
+
+     /controllers/UserController.php
+        
+	public function getUser(Request $request, $id){}
+
+    /view
+
+	href="{{ route('user.get', ['id' => 1 ])}}"
+
+	
+   add 'middleware' => 'auth' to the route - only accessible to logged in users
+    ex:
+
+	Route::get('/user/{id}',[
+   
+          	'uses' => 'UserController@getUser',
+    
+          	'as' => 'user.get'
+]);,
+		'middleware' => 'auth'
+
+
+--------------------------------------------------------
+-routes/web.php
+
+	Route::get('hello', 'Hello@index');
+
+
+-app/http/controllers/Hello.php
+
+	public function index()
+	{
+    	return 'hello world from controller : )';
+	}
+
+
+
+
+
+------------------------------------------------------------------------Loading a view from a controller
+
+------resources/views/hello.blade.php  (view)
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Laravel</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="content">
+                <div class="title">Hello {{$name}}, welcome to Laraland! : )</div>
+            </div>
+        </div>
+    </body>
+</html>
+
+------routes/web.php
+	
+	Route::get('/hello/{name}', 'Hello@show');
+
+
+------app/http/controllers/Hello.php
+
+	public function show($name)
+	{
+    		return view('hello',array('name' => $name));
+	}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+------------VIEWS---------------------------------------------------------------------------------------------------------------------------------
+
+---Master layout (resources/views/layouts/master.blade.php)
+<html>
+    <head>
+        <title>@yield('title')</title>
+    </head>
+    <body>
+        @section('sidebar')
+            This is the master sidebar.
+        @show
+
+        <div class="container">
+            @yield('content')
+        </div>
+    </body>
+</html>
+
+@yield('title')     -  is used to display the value of the title
+@section('sidebar') -  is used to define a section named sidebar
+@show               -  is used to display the contents of a section
+@yield('content')   -  is used to display the contents of content
+
+
+---Extending the master layout  (/resources/views/page.blade.php)
+
+@extends('layouts.master')
+
+@section('title', 'Page Title')
+
+@section('sidebar')
+    @parent
+
+    <p>This is appended to the master sidebar.</p>
+@endsection
+
+@section('content')
+    <p>This is my body content.</p>
+@endsection
+
+
+
+
+@extends('layouts.master')                     -  extends the master layout
+@section('title', 'Page Title')                -  sets the value of the title section.
+@section('sidebar')                            -  defines a sidebar section in the child page of master layout
+@parent                                        -  displays the contents of the sidebar section that is defined in the master layout
+<p>This is appended to the master sidebar.</p> -  adds paragraph content to the sidebar section
+@endsection                                    -  ends the sidebar section
+@section('content')                            -  defines the content section
+@section('content')                            -  adds paragraph content to the content section
+@endsection                                    -  ends the content section
+
+
+-----Useful pieces of shit
+
+	{{url('products')}}
+
+		- {{url('products')}} calls the url helper function and pass in products as the parameter. 
+		  The url function will create a URL that is relative to the public directory. 
+		  For our example, the url function will return http://localhost/products
+
+
+        {{asset('css/name.css')}}
+
+                - {{asset('css/name.css')}} calls the asset helper function and pass in css/name.css as the parameter. 
+                  The asset function will return the path of the public folder and append css/name.css at the end. 
+                  For our example, the asset function will return http://localhost/larashop/public/css/name.css
+
+
+	{{route('user.signup')}}
+ 
+                - calls the route named(as) 'user.signup'
+                  Ex:
+			Route::get('/signup', [
+				
+'uses' => 'UserController@getSignup',
+    
+				'as' => 'user.signup'
+]);
+
+
+	URL::to('src/js/checkout.js')
+	
+		- helper that get correct/clear link (public/src/js/checkout.js)
+		  Ex:  ___.blade.php
+
+			<script type="text/javascript" src="{{ URL::to(src/js/checkout.js') }}"></script>
+
+	Session::has('error')
+		-checks if session has error
+		  Ex:  ___.blade.php
+
+			<div id="charge-error" class="alert alert-danger {{ !Session::has('error') ? 'hidden' : '' }}"> </div>
+			
+
+
+        return redirect()->back();
+
+                - redirect the user to their previous location ( use this to the controller)
+
+
+	return view('shop.shopping-cart')
+
+                - (use to controller) - render views/shop/shopping-cart.blade.php 
+
+
+	return view('shop.checkout', ['total' => $total]);
+
+		- (use to controller) - render views/shop/shopping-cart.blade.php 
+                - returns a variable called 'total' that can be use on view (in this case views/shop/checkout.blade.php), to use on view: {{ $total }} 
+
+
+
+---AUTH METHODS
+
+	Auth::attempt()
+        ex:
+        	(Auth::attempt(['email' => $request->input('email'), 'password' => $request->input('password') ]))
+
+		-- for login authentication, returns true if successful otherwise false
+
+        Auth::logout()
+		
+		-- for logout 
+
+        Auth::login($user);
+
+		-- for login(from controller), where the parameter is a user object.
+
+	Auth::check()
+
+                -- returns true if the user is currently logged in.
+                -- to use on view:
+                       @if(Auth::check())
+			 
+                       @else
+
+		       @endif
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+------------Model---------------------------------------------------------------------------------------------------------------------------------
+
+Eloquent ORM is an Object Relational Mapper developed by Laravel.
+
+-----Create a model
+
+	php artisan make:model Category
+
+     -- php artisan make:model Category - creates a model named Category in /app/Category.php
+     
+     -- created file is located at: /app/Category.php
+
+	?php
+
+	namespace App;
+
+	use Illuminate\Database\Eloquent\Model;
+
+	class Category extends Model
+	{
+    	//
+	}
+
+         - use Illuminate\Database\Eloquent\Model; - imports the Eloquent model class namespace 
+         - class Category extends Model            - defines a model Category that extends Model
+ 
+
+-----Table name and primary key
+
+
+     -- By default, the plural form of the model name is used as the table name and the primary key field name is assumed to be id.
+
+     -- The code below shows you how you can explicitly define both the table and primary key field names:
+
+        Add the following lines to Category model
+
+		protected $primaryKey = 'id';
+		protected $table = 'categories';
+          
+                - protected $primaryKey = 'id';     - explicitly defines the primary key field name
+                - protected $table = 'categories';  - explicitly defines the name of the table
+ 
+
+-----Record timestamps
+
+    -- By default, Laravel assumes you have added the following fields to all of your database tables:
+
+		created_at
+		updated_at
+
+          - These fields are updated whenever you create a new record or update an existing record.
+
+    -- if you do not want to use these timestamp fields in your database tables, you can set the following property to turn them off.
+
+		public $timestamps = false;
+
+ 	  - public $timestamps = false; - tells Eloquent ORM model not to consider created_at and updated_at table fields.
+
+
+
+-----Run raw SQL Statement
+
+   -- Run: php artisan make:model BaseModel
+
+   -- Modify the contents:
+
+	namespace App;
+
+	use Illuminate\Database\Eloquent\Model;
+	use DB;
+
+	class BaseModel extends Model {
+
+    		public function selectQuery($sql_stmt) {
+        		return DB::select($sql_stmt);
+    		}
+
+    		public function sqlStatement($sql_stmt) {
+        		DB::statement($sql_stmt);
+    		}
+	}
+
+           - namespace App;                                                          - defines the namespace for our base model
+
+           - use Illuminate\Database\Eloquent\Model;                                 - imports the Eloquent ORM model
+
+           - use DB;                                                                 - imports the DB namespace
+
+           - public function selectQuery($sqlstmt) { return DB::select($sqlstmtt); } - defines a public function selectQuery($sql_stmt). 
+             $sqlstmt is a string parameter that contains the SQL statement to be executed. DB::select($sqlstmt) executes the SQL statement
+
+           - public function sqlStatement($sqlstmt) { DB::statement($sqlstmtt); }    - defines a public function sqlStatement. 
+             $sqlstmt is a string parameter that contains the SQL statement to be executed. DB::statement($sqlstmt) executes the SQL statement
+
+
+   -- Modify Category model:
+
+       - /app/Category.php
+
+		class Category extends BaseModel {
+    			protected $primaryKey = 'id';
+    			protected $table = 'categories';
+    			protected $fillable = array('name', 'created_at_ip', 'updated_at_ip');
+		}
+
+          - namespace App;                                                       - defines the model namespace
+ 
+          - class Category extends BaseModel                                     - defines the category class that extends the BaseModel
+
+          - protected $primaryKey = 'id';                                        - explicitly defines the primary key field name. 
+                                                                                   The default is id so in this case itfs not really necessary to specify it. 
+                                                                                   Personally I prefer setting the name explicitly.
+
+          - protected $table = 'categories';                                     - explicitly defines the table name. 
+                                                                                   The default is the plural form of the model name.
+
+          - protected $fillable = array('name', 'createdatipp', 'updatedatip');  - defines field names that can be mass assigned. 
+                                                                                   This is a security measure that ensures only authorized fieldnames are affected.
+
+
+-----Eloquent ORM INSERT
+
+ * We will use the category model to add data to a record to the database.
+   For the sake of simplicity, we will do this from a route
+
+- /app/Http/routes.php
+
+	Route::get('/insert', function() {
+    		App\Category::create(array('name' => 'Music'));
+    		return 'category added';
+	});
+
+     - App\Category::create(array('name' => 'Music')); executes the create static function of the model. 
+       The array array('name' => 'Music') matches field names to values. 
+       Eloquent model will use these values to generate the SQL insert statement and execute it.
+
+     - return 'category added'; outputs category added in the web browser
+
+
+-----Eloquent ORM READ
+
+- /app/Http/routes.php
+
+	Route::get('/read', function() {
+    		$category = new App\Category();
+    
+    		$data = $category->all(array('name','id'));
+
+    		foreach ($data as $list) {
+        		echo $list->id . ' ' . $list->name . '
+		';
+    		}
+	});
+
+        - $category = new App\Category();             - creates an instance variable of Category model
+
+        - $data = $category->all(array('name','id')); - calls the all method of the model. 
+          The array parameter array('name','id')      - is used to specified the column names that the query should return. 
+                                                        If left blank, then all columns will be returned.
+
+        - foreach ($data as $list){c}                - loops through the returned results and displays the rows in the browser.
+
+
+
+-----Eloquent ORM UPDATE
+
+ * We will update a record using the id. Based on the above results, we will update music category with id 6 to HEAVY METAL 
+
+ - /app/Http/routes.php
+
+Route::get('/update', function() {
+    $category = App\Category::find(16);
+    $category->name = 'HEAVY METAL';
+    $category->save();
+    
+    $data = $category->all(array('name','id'));
+
+    foreach ($data as $list) {
+        echo $list->id . ' ' . $list->name . '
+';
+    }
+});
+
+    - $category = App\Category::find(16); call find function of the model and pass in 16 as the primary key parameter value. 
+      Eloquent will return a record with primary key value 16
+
+    - $category->name = 'HEAVY METAL'; assigns the value HEAVY METAL to the name field
+
+    - $category->save(); saves the changes made to the record
+
+    - $data = $category->all(array('name','id')); retrieves all the categories
+
+    - foreach ($data as $list){c} loops through all the records and display the value in the web browser.
+
+
+
+-----Eloquent ORM DELETE
+
+ * We will delete the category CLOTHING.
+
+ - /app/Http/routes.php
+
+Route::get('/delete', function() {
+    $category = App\Category::find(5);
+    $category->delete();
+    
+    $data = $category->all(array('name','id'));
+
+    foreach ($data as $list) {
+        echo $list->id . ' ' . $list->name . '
+';
+    }
+});
+
+
+   - $category->delete(); deletes the record that was retrieved via the find method
+
+
+
+-----Simple Example
+
+ * Run: php artisan make:model Brand
+
+- /app/Brand
+
+
+<?php
+
+namespace App;
+
+class Brand extends Model {
+    protected $primaryKey = 'id';
+    protected $table = 'brands';
+    protected $fillable = array('name', 'created_at_ip', 'updated_at_ip');
+}
+
+
+
+- app/Http/Controllers/Some_controller.php
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Some_model;
+
+class Front extends Controller {
+
+	var $brands;
+
+        public function __construct() {
+		$this->some_brands = Brand::all(array('name'));
+        }
+
+        public function index() {
+        return view('home', array('title' => 'Welcome','brands' => $this->brands, 'page' => 'home'));
+    }
+
+}
+
+
+- on view
+
+@foreach ($brands as $brand)
+    {{$brand->name}}
+@endforeach
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+------------MIGRATION-----------------------------------------------------------------------------------------------------------------------------
+
+---Setting database connection 
+
+/config/database.php
+
+'mysql' => [
+    'driver'    => 'mysql',
+    'host'      => env('DB_HOST', 'localhost'),
+    'database'  => env('DB_DATABASE', 'larashop'),
+    'username'  => env('DB_USERNAME', 'root'),
+    'password'  => env('DB_PASSWORD', 'password'),
+    'charset'   => 'utf8',
+    'collation' => 'utf8_unicode_ci',
+    'prefix'    => '',
+    'strict'    => false,
+],
+
+
+/.env
+DB_HOST=localhost
+DB_DATABASE=larashop
+DB_USERNAME=root
+DB_PASSWORD=password
+
+
+-----Create migration table
+
+	php artisan migrate:install
+        php artisan make:migration create_drinks_table
+
+         - php artisan make:migration executes the make migration method via the artisan command.
+         - create_drinks_table specifies the name of the migration file that will be created. 
+           Note: a timestamp will be added to the beginning of the migration file
+
+-----Migration File
+
+	<?php
+
+	use Illuminate\Database\Schema\Blueprint;
+	use Illuminate\Database\Migrations\Migration;
+
+	class CreateDrinksTable extends Migration
+	{
+    		public function up()
+    		{
+        	//
+    		}
+    
+    		public function down()
+    		{
+        	//
+    		}
+	}
+
+     -- class CreateDrinksTable extends Migration defines the CreateDrinksTable class that extends Migration class
+     -- public function up() defines the function that is executed when the migration is run
+     -- public function down() defines the function that is executed when you run migration rollback
+
+
+-----Create a table using a migration
+
+	<?php
+
+	use Illuminate\Database\Schema\Blueprint;
+	use Illuminate\Database\Migrations\Migration;
+
+	class CreateDrinksTable extends Migration
+	{
+    		public function up(){
+			Schema::create('drinks', function (Blueprint $table) {        	
+                        $table->increments('id');
+                        $table->string('name',75)->unique();
+                        $table->text('comments')->nullable();
+                        $table->integer('rating');
+                        $table->date('brew_date');
+                        $table->timestamps();        });
+    		}
+    
+    		public function down(){
+        		Schema::drop('drinks');
+    		}
+	}
+
+
+     -- Schema::create('drinks', function (Blueprint $table) {..} - calls the create function of the Schema class. 
+                                                                    The create function is responsible for creating the database table. 
+                                                                    function (Blueprint $table) is a closure function with a $table parameter. 
+                                                                    The $table parameter is used to define the structure of the database.
+
+     -- $table->increments('id');                                 - increments is used to define an auto increment field. 
+                                                                    The name of the field is id as specified in the parameter of increments
+
+     -- $table->string('name',75)->unique();                      - string is used to define varchar fields. 
+                                                                    The second parameter is the length of the field. 
+                                                                    ->unique() is used to mark the column as unique.
+
+     -- $table->text('comments')->nullable();                     - is used to define text fields. 
+                                                                    ->nullable() is used to allow the column to accept null values.
+
+     -- $table->integer('rating');                                - integer is used to define int fields.
+
+     -- $table->date('brew_date');                                - is used to define date fields.
+
+     -- $table->timestamps();                                     - is used to automatically create two time stamp fields namely created_at and updated_at.
+
+
+-----Run Migration
+
+	php artisan migrate
+
+-----Reset Migration
+
+        php artisan migrate:reset
+
+-----Rollback Migration
+
+	php artisan migrate:rollback
+
+        php artisan migrate:reset    -->  will roll back all of your application's migrations
+
+-----Migration insert data
+
+	php artisan make:migration employees   --> to create migration file
+
+-/database/migrations/xxxxxxxxx_employees.php
+
+<?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class Employees extends Migration
+{
+
+    public function up()
+    {
+        Schema::create('employees', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('contact_number');
+            $table->timestamps();       
+        });
+
+        $faker = Faker\Factory::create();
+
+        $limit = 33;
+
+        for ($i = 0; $i < $limit; $i++) {
+            DB::table('employees')->insert([ //,
+                'name' => $faker->name,
+                'email' => $faker->unique()->email,
+                'contact_number' => $faker->phoneNumber,
+            ]);
+        }
+    }
+
+    public function down()
+    {
+        Schema::drop('employees');
+    }
+}
+
+   -- $faker = Faker\Factory::create();                                       - creates an instance of Faker factory
+
+   -- $limit = 33;                                                            - sets the number of records that we want to add to the database.
+
+   -- for ($i = 0; $i < $limit; $i++) { DB::table('employees')->insert([c]);}- uses a for loop to add records to the database 33 times. 
+                                                                                $faker->name generates a faker name, 
+                                                                                $faker->unique()->email generates a fake unique email address, 
+                                                                                and $faker->phoneNumber generates a fake
+  
+
+
+
+-----Migration add column / drop column
+
+	php artisan make:migration add_gender_to_employees --table=employees
+
+          *  --table=employees tells Laravel we want to work with an existing table called employees
+
+-/database/migration/xxxxxxxxxxxxxxx_add_gender_to_employees.php 
+
+  * MODIFY THE CREATED FILE
+
+<?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class AddGenderToEmployees extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('employees', function (Blueprint $table) {
+            $table->string('gender')->after('contact_number');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('employees', function (Blueprint $table) {
+            $table->dropColumn('gender');
+        });
+    }
+}
+
+ * public function up(){c} uses Schema::table('employees'c) to add a new column gender
+ * public function down(){c} drops the new column from the table when we reverse the command. 
+   $table->dropColumn('gender'); is the command that drops the table.
+
+
+-----Migration change column type
+
+ *  Need to install Doctrine Database Abstract Layer DDBAL in Laravel before we can change columns. 
+    DDBAL is used for Laravel migration alter table tasks.
+
+ * add "doctrine/dbal": "v2.4.2" to composer.json:
+
+	"require": {
+    		"php": ">=5.5.9",
+    		"laravel/framework": "5.1.*",
+    		"gloudemans/shoppingcart": "~1.3",
+    		"doctrine/dbal": "v2.4.2"
+	}
+  
+  * Run : Composer update
+  * We created the gender column with the default size of 255. Letfs we want to change it to 5 as the maximum size:
+
+    -  Run : php artisan make:migration modify_gender_in_employees --table=employees
+
+    -  Modify it:
+
+	class ModifyGenderInEmployees extends Migration
+	{
+
+    		public function up()
+    		{
+        		Schema::table('employees', function (Blueprint $table) {
+            		$table->string('gender', 5)->change();
+       			});
+    		}
+
+    		public function down()
+    		{
+        		Schema::table('employees', function (Blueprint $table) {
+            		$table->string('gender', 255)->change();
+        		});
+    		}
+	}
+
+        - $table->string('gender', 5)->change(); maintains the varchar data type and sets the character limit to 5. 
+          If we wanted to change the data type too, we would have specified a different data type.
+
+        - $table->string('gender', 255)->change(); rollback the migration to the previous state.
+
+
+
+-----Migration nullable
+
+  * By default, Laravel assumes all columns are required unless you tell it so. Letfs assume the gender field is optional.
+
+  * Run: php artisan make:migration make_gender_null_in_employees --table=employees
+
+  * Modify the created file to:
+
+
+    public function up()
+    {
+        Schema::table('employees', function (Blueprint $table) {
+            $table->string('gender', 5)->nullable()->change();
+        });
+    }
+
+
+    public function down()
+    {
+        Schema::table('employees', function (Blueprint $table) {
+            $table->string('gender', 5)->change();
+        });
+    }
+
+        - $table->string('gender', 5)->nullable()->change(); allows the gender column to accept null values.
+
+
+
+-----Migration foreign key
+
+ * Letfs say we want to group our employees by their departments, we can add a foreign key for the dept_id
+ 
+ * Run: php artisan make:migration depts
+ 
+ * Modify the created file to:
+
+    public function up()
+    {
+        Schema::create('depts', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::drop('depts');
+    }
+
+ * Run: php artisan migrate
+
+ * The primary and foreign key relationship requires both tables to have the same data type and length. 
+   We used Schemafs increments to define the primary key for depts id. Schemafs increments creates an unsigned integer INT(10), 
+   Schemafs integer creates signed integer INT(11).
+
+
+ * Run (to create the migration for adding the dept_id to the employees table):  
+    
+       php artisan make:migration add_dept_id_in_employees --table=employees
+
+ * Modify the created file to:
+
+    public function up()
+    {
+        Schema::table('employees', function (Blueprint $table) {
+            $table-> unsignedInteger ('dept_id')->after('gender');
+            $table->foreign('dept_id')
+            ->references('id')->on('depts')
+            ->onDelete('cascade');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('employees', function (Blueprint $table) {
+            $table->dropColumn('dept_id');
+        });
+    }
+
+
+  * Run: php artisan migrate 
+
+
+
+
+-----Database seeding
+
+  * Run: php artisan make:seeder DrinksTableSeeder
+
+  * The created file:
+
+     class DrinksTableSeeder extends Seeder
+
+	class DrinksTableSeeder extends Seeder
+	{
+
+    		public function run()
+    		{
+        	//
+    		}
+	}
+
+    }
+
+        - class DrinksTableSeeder extends Seeder defines the table DrinksTableSeeder that extends the Seeder class
+   
+        - public function run() defines the function that is executed when you run the seed command from artisan
+
+
+  * Modify the created file:
+
+    public function run() {
+        DB::table('drinks')->insert([
+            'name' => 'Vodka',
+            'comments' => 'Blood of creativity',
+            'rating' => 9,
+            'brew_date' => '1973-09-03',
+        ]);
+    }
+        - The above table uses an array that matches database field name to values and inserts the record into the specified table drinks.
+
+-RUN Seeder
+
+
+  * Run: php artisan db:seed --class=DrinksTableSeeder
+
+        - php artisan db:seed executes the seed command
+        - --class=DrinksTableSeeder specified the name of the seeder class that should be executed
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+------------Authentication------------------------------------------------------------------------------------------------------------------------
+
+ -- authentication configuration file is located in /config/auth.php
+
+ -- By default, Laravel comes with a migration for the users table.
+     /database/migrations/ 20141012000000createuserstable.php
+
+ -- Laravel provides a quick way to scaffold all of the routes and views you need for authentication using one simple command:
+    
+	php artisan make:auth
+
+     - This command should be used on fresh applications and will install a layout view, registration and login views, as well as routes for all        authentication end-points. 
+       A HomeController will also be generated to handle post-login requests to your application's dashboard.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+------------Session-------------------------------------------------------------------------------------------------------------------------------
+
+-----Configuration	
+
+	/config/session.php
+
+	
+	/.env
+
+-----Sample
+
+at controller add:
+
+		use Session;
+
+
+	Session::has('cart')
+	
+		- returns true if session named 'cart' exists
+
+	Session::get('cart')
+		
+		- get session named 'cart'
+
+	Session::put('cart', $cart)
+	
+		- store a session named cart value = $cart
+
+
+	Session::forget('cart');
+
+		- delete session named 'cart'
+
+	Session::has('error')
+	
+		- returns true if session has error otherwise false
+			
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+------------Shopping cart-------------------------------------------------------------------------------------------------------------------------
+
+-----Installing Laravel Shopping Cart via composer
+
+ -- /composer.json
+
+     "require": {
+	"gloudemans/shoppingcart": "~1.3"
+     },
+
+        - "gloudemans/shoppingcart": "~1.3" installs version 1.3 of the shoppingcart into our Larashop tutorial project
+
+
+ -- Run: composer update
+
+
+
+-----Configuring Laravel 5 to work with Shopping Cart
+
+ -- /config/app.php
+ 
+ -- add  Gloudemans\Shoppingcart\ShoppingcartServiceProvider::class   to  providers array.
+    The above code registers the service provider for the shopping cart.
+
+ -- add an alias name for our shopping cart:
+
+      - add  'Cart'    => Gloudemans\Shoppingcart\Facades\Cart::class, to aliases
+        The above code defines an alias name that we will be using when working with the shopping cart
+
+
+-----Adding items to the shopping cart
+
+
+--Step 1: HTTP POST verb route
+
+   - /app/Http/routes.php
+       
+          Route::post('/cart', 'Front@cart');
+       
+            - Route::post('/cart', 'Front@cart'); defines a route for the POST HTTP verb for the URL cart. 
+              This route will be used to add items to the shopping cart
+
+
+--Step 2: Products.blade.php FORM
+    
+  * add a form to the products blade template. The form will submit the product id to be added to the cart.
+
+  - /resources/views/products.blade.php
+
+                                        <form method="POST" action="{{url('cart')}}">
+                                            <input type="hidden" name="product_id" value="{{$product->id}}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-fefault add-to-cart">
+                                                <i class="fa fa-shopping-cart"></i>
+                                                Add to cart
+                                            </button>
+                                        </form>
+
+        - <form method="POST" action="{{url('cart')}}"> creates a HTML form with a POST method. The form data is submitted to /cart URL
+
+        - <input type="hidden" name="product_id" value="{{$product->id}}"> defines a hidden element that contains the product id to be added to the shopping cart
+
+        - <input type="hidden" name="token" value="{{ csrftoken() }}}"> defines a hidden element that contains a security token. 
+          The csrf_token() helper function is used to generate the token value.
+
+        - <button type="submit" class="btn btn-fefault add-to-cart"> adds a submission button to our form.
+
+
+--Step 3: Modify Front controller cart method
+
+   - add the codes below to /app/Http/Controllers/Front.php 
+
+	use Illuminate\Support\Facades\Request;
+	use Illuminate\Support\Facades\Redirect;
+	use Cart;
+
+      - Request is used to access HTTP verbs data
+      - Redirect is used to redirect after performing an action that does not need to display anything
+      - Cart is used to hold the items in the shopping cart
+
+  -  add/edit function cart on the controller:
+
+	public function cart() {
+    		if (Request::isMethod('post')) {
+        		$product_id = Request::get('product_id');
+        		$product = Product::find($product_id);
+        		Cart::add(array('id' => $product_id, 'name' => $product->name, 'qty' => 1, 'price' => $product->price));
+    		}
+
+    		$cart = Cart::content();
+
+    		return view('cart', array('cart' => $cart, 'title' => 'Welcome', 'description' => '', 'page' => 'home'));
+	}
+
+       - if (Request::isMethod('post')) {c} checks if the request uses the POST HTTP verb. If yes then the code within the if statement block is executed
+
+       - $productid = Request::get('product$productidd'); This code is used to retrieve the value of productid and assigns it to the variable $productid. 
+         The get method of Request is used to retrieve variables. get is HTTP agnostic, it can be used to get values for GET as well as POST.
+
+       - $product = Product::find($product_id); uses the product model to retrieve the product from the database. 
+         The returned product object is used to get the product name and price.
+
+       - Cart::add(array('id' => $product_id, 'name' => $product->name, 'qty' => 1, 'price' => $product->price)); calls the add method of the Cart and 
+         pass in an array of variables. We are passing in the id, name, quantity (qty) and the price. 
+         The product name and price are retrieved from the database record.
+
+       - $cart = Cart::content(); calls the content method of Cart to return a collection of items in the shopping cart
+
+       - return view('cart', array('cart' => $cart, 'title' => 'Welcome', 'description' => '', 'page' => 'home')); 
+         adds the collection returned from Cart::content() to the list of variables that are passed to the view.
+
+
+
+
+Step 4: Retrieving items from the shopping cart
+
+ - /resources/views/cart.blade.php
+
+@extends('layouts.layout')
+
+@section('content')       
+<section id="cart_items">
+    <div class="container">
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li><a href="#">Home</a></li>
+                <li class="active">Shopping Cart</li>
+            </ol>
+        </div>
+        <div class="table-responsive cart_info">
+            @if(count($cart))
+            <table class="table table-condensed">
+                <thead>
+                    <tr class="cart_menu">
+                        <td class="image">Item</td>
+                        <td class="description"></td>
+                        <td class="price">Price</td>
+                        <td class="quantity">Quantity</td>
+                        <td class="total">Total</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($cart as $item)
+                    <tr>
+                        <td class="cart_product">
+                            <a href=""><img src="images/cart/one.png" alt=""></a>
+                        </td>
+                        <td class="cart_description">
+                            <h4><a href="">{{$item->name}}</a></h4>
+                            <p>Web ID: {{$item->id}}</p>
+                        </td>
+                        <td class="cart_price">
+                            <p>${{$item->price}}</p>
+                        </td>
+                        <td class="cart_quantity">
+                            <div class="cart_quantity_button">
+                                <a class="cart_quantity_up" href=""> + </a>
+                                <input class="cart_quantity_input" type="text" name="quantity" value="{{$item->qty}}" autocomplete="off" size="2">
+                                <a class="cart_quantity_down" href=""> - </a>
+                            </div>
+                        </td>
+                        <td class="cart_total">
+                            <p class="cart_total_price">${{$item->subtotal}}</p>
+                        </td>
+                        <td class="cart_delete">
+                            <a class="cart_quantity_delete" href=""><i class="fa fa-times"></i></a>
+                        </td>
+                    </tr>
+                    @endforeach
+                    @else
+                <p>You have no items in the shopping cart</p>
+                @endif
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section> <!--/#cart_items-->
+
+<section id="do_action">
+    <div class="container">
+        <div class="heading">
+            <h3>What would you like to do next?</h3>
+            <p>Choose if you have a discount code or reward points you want to use or would like to estimate your delivery cost.</p>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="chose_area">
+                    <ul class="user_option">
+                        <li>
+                            <input type="checkbox">
+                            <label>Use Coupon Code</label>
+                        </li>
+                        <li>
+                            <input type="checkbox">
+                            <label>Use Gift Voucher</label>
+                        </li>
+                        <li>
+                            <input type="checkbox">
+                            <label>Estimate Shipping & Taxes</label>
+                        </li>
+                    </ul>
+                    <ul class="user_info">
+                        <li class="single_field">
+                            <label>Country:</label>
+                            <select>
+                                <option>United States</option>
+                                <option>Bangladesh</option>
+                                <option>UK</option>
+                                <option>India</option>
+                                <option>Pakistan</option>
+                                <option>Ucrane</option>
+                                <option>Canada</option>
+                                <option>Dubai</option>
+                            </select>
+
+                        </li>
+                        <li class="single_field">
+                            <label>Region / State:</label>
+                            <select>
+                                <option>Select</option>
+                                <option>Dhaka</option>
+                                <option>London</option>
+                                <option>Dillih</option>
+                                <option>Lahore</option>
+                                <option>Alaska</option>
+                                <option>Canada</option>
+                                <option>Dubai</option>
+                            </select>
+
+                        </li>
+                        <li class="single_field zip-field">
+                            <label>Zip Code:</label>
+                            <input type="text">
+                        </li>
+                    </ul>
+                    <a class="btn btn-default update" href="">Get Quotes</a>
+                    <a class="btn btn-default check_out" href="">Continue</a>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="total_area">
+                    <ul>
+                        <li>Cart Sub Total <span>$59</span></li>
+                        <li>Eco Tax <span>$2</span></li>
+                        <li>Shipping Cost <span>Free</span></li>
+                        <li>Total <span>${{Cart::total()}}</span></li>
+                    </ul>
+                    <a class="btn btn-default update" href="{{url('clear-cart')}}">Clear Cart</a>
+                    <a class="btn btn-default check_out" href="{{url('checkout')}}">Check Out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!--/#do_action-->
+@endsection
+
+
+ - @if(count($cart)) line 13 uses the count function to determine if the $cart variable has any contents. 
+   If the cart has items, then we dynamically create a table that displays the items
+
+ - @foreach($cart as $item) line 26 uses the foreach loop to loop through the items collection
+
+ - {{$item->name}} displays the product name
+
+ - {{$item->id}} displays the product id
+
+ - {{$item->price}} displays the product price
+
+ - {{$item->subtotal}} displays the product subtotal. The subtotal is the product of quantity and price.
+
+ - {{Cart::total()}} displays the sum total of all items in the shopping cart
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

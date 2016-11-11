@@ -1,0 +1,1842 @@
+
+
+-------PEAR-----------------------------------------------------------------------------------------------------------------------------------
+
+PEAR - PHP Extension and Application Repository
+
+- The concept is simple: other programmers, usually specialists in their areas, write very complicated code, and 
+  present it to you in an easy-to-use form, thereby enabling you to create very powerful scripts using just a few simple commands.
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+------PRINT-----------------------------------------------------------------------------------------------------------------------------------
+
+<?php
+    $name = "Paul";
+    print "Your name is $name\n";
+    print 'Goodbye, $name!\n';
+?>
+
+ output:
+     Your name is Paul
+     Goodbye, $name!\n
+
+ - PHP will not perform variable substitution for variables inside single-quoted strings, and won't even replace the escape characters.
+
+ - Whereas in double-quoted strings, PHP will replace the variable $name with its value, in a single-quoted string, 
+   PHP will consider $name to mean that you actually want it to output the word "$name" just like that.
+
+--------------------------------------------------
+
+<?php
+    $food = "grapefruit";
+    print "These $foods aren't ripe yet.";
+?>
+ 
+ -Ideally what we wanted to be printed was "These grapefruits aren't ripe yet", but because we have added the S to the end of the 
+  variable name, we have changed it from trying to read $food to trying to read $foods. The variable $foods does not exist, 
+  so PHP will leave the space blank.
+
+
+There are two ways to do this:
+
+<?php
+    $food = "grapefruit";
+    print "These ${food}s aren't ripe yet.";
+    print "These {$food}s aren't ripe yet.";
+?>
+
+ -Both of those are valid and should work as expected. The braces, { and }, tell PHP where the variable ends.
+
+
+--------------------------------------------------
+
+Note that code like this will work without modification:
+
+<?php
+    $food = "grapefruit";
+    print "This $food's flavour is bad.";
+?>
+
+
+ -That will work fine because you are not allowed to use an apostrophe as part of your variable names. 
+  If you want to make your life easy you can just avoid the problem entirely by not getting PHP to substitute the variable
+
+
+You can just avoid the problem entirely by not getting PHP to substitute the variable:
+
+<?php
+    $food = "grapefruit";
+    print "These " . $food . "s aren't ripe yet.";
+?>
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Whitespace-----------------------------------------------------------------------------------------------------------------------------
+
+Spaces, tabs, and new lines in between statements have no effect on how the code is executed. 
+For example, this next script is the same as the previous script, even though it is laid out quite different:
+
+<?php
+    $name = "Paul"; print "Your name is $name\n";
+    $name2 = $name; $age = 20;
+
+
+
+    print "Your name is $name2, and your age is $age\n";
+
+
+    print 'Goodbye, $name!\n';
+?>
+
+
+It is generally recommended that you use whitespace to separate your code into clear blocks, 
+so that it can almost be understood simply by visually inspecting the layout.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------Escape sequences-----------------------------------------------------------------------------------------------------------------------
+
+You can achieve the same effect in double-quoted strings by using the escape character, which, in PHP, is a backslash \.
+
+
+    \"  ---------> Print the next character as a double quote, not a string closer
+    \'  ---------> Print the next character as a single quote, not a string closer
+    \n  ---------> Print a new line character (remember our print statements?)
+    \t  ---------> Print a tab character
+    \r  ---------> Print a carriage return (not used very often)
+    \$  ---------> Print the next character as a dollar, not as part of a variable
+    \\  ---------> Print the next character as a backslash, not an escape character
+
+Code example of these escape sequences in action:
+
+<?php
+    $MyString = "This is an \"escaped\" string";
+    $MySingleString = 'This \'will\' work';
+    $MyNonVariable = "I have \$zilch in my pocket";
+    $MyNewline = "This ends with a line return\n";
+    $MyFile = "c:\\windows\\system32\\myfile.txt";
+?>
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------Heredoc--------------------------------------------------------------------------------------------------------------------------------
+
+ -In order to allow people to easily write large amounts of text from within PHP, 
+  but without the need to constantly escape things, heredoc syntax was developed.
+
+ -it allows you to define your own string limiter so that you can make it something other than a double or single quote. 
+  So, for example, we could use the string "EOT" (end of text) for our delimiter, meaning that we can use double quotes and 
+  single quotes freely within the body of the text - the string only ends when we type EOT.
+
+ -the string delimiter needs to be by itself on a line, in the very first column. That is, you cannot add spacing or tabs around it.
+
+
+
+Example:
+
+<?php
+$mystring = <<<EOT     This is some PHP text.
+    It is completely free
+    I can use "double quotes"
+    and 'single quotes',
+    plus $variables too, which will
+    be properly converted to their values,
+    you can even type EOT, as long as it
+    is not alone on a line, like this: EOT;
+?>
+
+
+ There are several key things to note about heredoc, and the example above:
+
+	You can use anything you like; "EOT" is just an example
+
+	You need to use <<< before the delimiter to tell PHP you want to enter heredoc mode
+
+	Variable substitution is used in PHP, which means you do need to escape dollar symbols 
+          - if you do not, PHP will attempt variable replacement.
+
+	You can use your delimiter anywhere in the text, but not in the first column of a new line
+
+	At the end of the string, just type the delimiter with no spaces around it, followed by a semi-colon to end the statement
+
+ Without heredoc syntax, complicated string assignments can quickly become very messy. Heredoc is not used all that often in the wild 
+ very often you will wish it were used more, because too many scripts you will come across have messy code as a result of not using heredoc!
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------Opening and closing code islands-------------------------------------------------------------------------------------------------------
+
+ There are two main ways to open a PHP code island (to enter PHP parsing mode), and you are welcome to choose which you prefer. 
+ The most common (and recommended) manner is to use <?php to enter PHP mode, and ?> to leave PHP mode, 
+ however you can also use the short tags version, <? and ?>.
+
+
+The short version has one big advantage and one big disadvantage. 
+The advantage is that you can output information from your script by using a special short tags hack, <?=. Here is how that looks:
+
+	<?="Hello, world!"
+	?>
+
+Here is the equivalent written using the standard open and closing tags:
+
+	<?php
+    		print "Hello, world!";
+	?>
+
+However, the big downside to the short version is that it clashes with XML, which also uses <? to open code blocks. 
+This means that if you try to use XML and short-tagged PHP together, you'll almost certainly encounter problems - 
+this is the primary reason people recommend using the normal open and close tags.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------Comments-------------------------------------------------------------------------------------------------------------------------------
+
+ PHP has three ways of doing this: //, /* */, and #.
+
+  - // and # mean, "ignore the rest of this line"
+  - /* means "ignore everything until you see */".
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------Case switching-------------------------------------------------------------------------------------------------------------------------
+
+
+<?php
+    $Name = 'Bob';
+    switch($Name) {
+        case "Jim": print "Your name is Jim\n"; break;
+        case "Linda": print "Your name is Linda\n"; break;
+        case "Bob": print "Your name is Bob\n"; break;
+        case "Sally": print "Your name is Sally\n"; break;
+        default: print "I do not know your name!\n";
+    }
+?>
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Loops----------------------------------------------------------------------------------------------------------------------------------
+
+There are four ways to make code loop in PHP so that you can perform repetitive actions, and each work in different ways. 
+In practice, only three of the four are used regularly, but you need to at least be aware of all four.
+
+While loop:
+
+	while (condition is true) {
+    		do code
+	}
+
+
+For loop:
+
+
+    	for ($i = 1; $i < 10; $i = $i + 1) {
+        	print "Number $i\n";
+    	}
+
+
+do...while:
+
+    	$foo = 12;
+    	do {
+        	do_bar();
+    	} while ($foo < 10);
+
+
+ -do while -  it is always executed at least once.
+
+
+----------Loop keywords
+
+ - "continue" is used to skip the rest of that iteration.
+ - "break" is used to exit the loop altogether
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+-------Including other files------------------------------------------------------------------------------------------------------------------
+
+
+	<?php
+    		print 'Starting foo\n';
+    		include 'bar.php';
+    		print 'Finishing foo\n';
+	?>
+
+
+the file bar.php:
+
+	<?php
+    		print 'In bar\n';
+	?>
+
+
+Therefore, foo.php would look like this:
+
+	<?php
+    		print 'Starting foo\n';
+    		print 'In bar\n';
+    		print 'Finishing foo\n';
+	?>
+
+
+
+
+--------------------------------------------------
+
+ -Two more keywords that are likely to be of use are include_once and require_once, 
+  which operate in the same way as include and require respectively, with the difference that they will only include a file once, 
+  even if you try to include it several times.
+ 
+ -Note that if PHP cannot find a file you try to include() or require() in the same directory as the script that is running, 
+  it will also look in its standard include path. This is defined in your php.ini file as the include_path directive.
+
+
+ -Each time you include a file using include() or require(), PHP needs to compile it. If you're using a code cache this problem is avoided, 
+  but if not PHP really does compile the same file several times. That is, if you have various includes for the same file, it will need to 
+  be compiled and processed each time - it's best to use include_once(). Failing that, there are two functions called get_included_files() 
+  and get_required_files() that will tell you the names of the files you have already included - they are actually the same 
+  function internally, so you can use either one.
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------isset()--------------------------------------------------------------------------------------------------------------------------------
+
+ -(literally "is a variable set?")
+
+ -it will return true or false depending on whether the variable is set.
+
+ ex:
+
+   $foo = 1;
+   if (isset($foo)) {
+        echo "yes";
+    }
+    
+   >> yes
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Type cast------------------------------------------------------------------------------------------------------------------------------
+
+ -Type cast - you forcibly convert a variable of type A to type B.
+
+	<?php
+    		$myinteger = 12;
+    		$myfloat = (float)$myinteger
+	?>
+ 
+
+ -You can type cast as boolean using (bool), string using (string), and floating-point using (float).
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Superglobals---------------------------------------------------------------------------------------------------------------------------
+
+ - They're called superglobal because they are available everywhere in your script, even inside objects.
+ - Superglobals can be used like any other arrays in PHP, which means you can iterate through them, etc.
+
+ There are nine superglobals available for use, categorised by type of variable. These are:
+
+     - $GLOBALS  - Contains all global variables in your script, including other superglobals. 
+                   This is not generally recommended for use, unless you are, for some reason, not sure where a variable will be stored. 
+                   $GLOBALS has been available since PHP 3, and its operation has not changed.
+
+     - $_GET     - Contains all variables sent via a HTTP GET request. That is, sent by way of the URL.
+
+     - $_POST    - Contains all variables sent via a HTTP POST request.
+
+     - $_FILES   - Contains all variables sent via a HTTP POST file upload.
+
+     - $_COOKIE  - Contains all variables sent via HTTP cookies.
+   
+     - $_REQUEST - Contains all variables sent via HTTP GET, HTTP POST, and HTTP cookies. 
+                   This is basically the equivalent of combining $_GET, $_POST, and $_COOKIE, and is less dangerous than using $GLOBALS. 
+                   However, as it does contain all variables from untrusted sources (that is, your visitors), 
+                    you should still try to steer clear unless you have very good reason to use it.
+
+     - $_SESSION - Contains all variables stored in a user's session.
+
+     - $_SERVER  - Contains all variables set by the web server you are using, or other sources that directly relate to the execution of 
+                   your script.
+
+     - $_ENV     - Contains all environment variables set by your system or shell for the script.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Pre-set variables----------------------------------------------------------------------------------------------------------------------
+
+ - PHP has set a number of variables for you containing information about the server, the environment, and the request from your visitor. 
+   These are stored in the superglobal arrays for you, and you can get a fairly complete list of what is available by using the phpinfo().
+
+
+ The most commonly used variables, all of which are stored in the $_SERVER superglobal, are as follows:
+
+ 	HTTP_REFERER    - If the user clicked a link to get the current page, this will contain the URL of the previous page they were at, or 
+                          it will be empty if the user entered the URL directly.
+
+        HTTP_USER_AGENT - The name reported by the visitor's browser.
+
+        PATH_INFO       - Any data passed in the URL after the script name.
+
+        PHP_SELF        - The name of the current script.
+
+        REQUEST_METHOD  - Either GET or POST.
+
+        QUERY_STRING    - Includes everything after the question mark in a GET request
+
+
+EX:
+
+    if (isset($_SERVER['HTTP_REFERER'])) {
+        print "The page you were on previously was {$_SERVER['HTTP_REFERER']}<br />";
+    } else {
+        print "You didn't click any links to get here<br />";
+    }
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------References-----------------------------------------------------------------------------------------------------------------------------
+
+
+ - To assign by reference you need to use the reference operator, &, after the equals operator, giving =&.
+   
+    $a = 10;
+    $b =& $a;
+    print $a;
+    print $b;
+
+ - Once two variables are pointing to the same data, you can change either variable and the other one will also update.
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------Constants------------------------------------------------------------------------------------------------------------------------------
+
+ - Constants are like variables except that once they are defined they cannot be undefined or changed.
+ - Constants, like variables, are case sensitive.
+ - Constants are automatically global across your entire script, unlike variables.
+
+ To set a constant, use the define() function - it takes two parameters, with the first being the name of the constant to set, 
+ and the second being the value to which you wish to set it:
+
+ 	define("CURRENT_TIME", time());
+ 	print CURRENT_TIME;
+
+ By passing true as a third parameter to define() makes the constant case-insensitive:
+
+ 	define("CURRENT_TIME", time(), true);
+ 	print Current_TiMe;
+
+
+----Defined()
+
+ -The defined() function is basically the constant equivalent of isset(), as it returns true if the constant string you pass to it has been 
+  defined.
+
+	define("CURRENT_TIME", time(), true);
+	if (defined("CURRENT_time")) {
+    		/// etc }
+
+ -Note that you should pass the constant name into defined() inside quotes.
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------Pre-set constants----------------------------------------------------------------------------------------------------------------------
+
+ - There are a number of constants automatically set for you by PHP in order to save you having to recalculate complicated values each time 
+   in your script, but it also provides other helpful information.
+   
+
+   Some pre-set constants:
+
+   	__FILE__     - the script filename being parsed. Note that this reports the file that contains the current line of code, so this will 
+                      report the name of an include file if used therein.
+
+        __LINE__     - The line number PHP is executing
+
+        __FUNCTION__ - The name of the function PHP is currently inside
+
+        __CLASS__    - The name of the class of the object being used
+
+        __METHOD__   - The name of the class function PHP is currently inside
+
+
+ - Note that those are double underscores on either side to make it unlikely you will want to use them for your own constants.
+ 
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Shorthand unary operators--------------------------------------------------------------------------------------------------------------
+
+<?php
+    $somevar = 5;
+    $somevar += 5; // $somevar is now 10                         ($somevar = $somevar + 5)
+    $somevar *= 2; // $somevar is now 20                         ($somevar = $somevar * 2)
+    $somevar .= " elephants"; // $somevar is now "20 elephants"  ($somevar = $somevar . " elephants")
+?>
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+----3 Complicated operators-------------------------------------------------------------------------------------------------------------------
+
+  - Ternary Operator
+  - Scope resolution operator
+  - Execution operator
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------Ternary Operator-----------------------------------------------------------------------------------------------------------------------
+
+ - It is called the ternary operator because it takes three operands - a condition, a result for true, and a result for false.
+ - The ternary operator is a shorthand (albeit very hard to read) way of doing if statements.
+
+ex:
+
+	<?php
+    		$agestr = ($age < 16) ? 'child' : 'adult';
+	?>
+
+ - First there is a condition ($age < 16), then there is a question mark, and then a true result, a colon, and a false result. 
+   If $age is less than 16, $agestr will be set to 'child', otherwise it will be set to 'adult'. 
+
+
+That one-liner ternary statement can be expressed in a normal if statement like this:
+
+	<?php
+    		if ($age < 16) {
+        		$agestr = 'child';
+    		} else {
+        		$agestr = 'adult';
+    		}
+	?>
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Scope resolution operator--------------------------------------------------------------------------------------------------------------
+
+ - The second complicated operator is known as the scope resolution operator, and is :: - two colons next to each other. 
+   It is used in object-oriented programming when you want to be specific about what kind of function you are calling.
+
+For example
+
+   if you have a function sayhello() as well as a sayhello() function of a Person object, you would use Person::sayhello()
+
+
+ - you resolve which sayhello() you mean by using the class name and the scope resolution operator.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Execution operator---------------------------------------------------------------------------------------------------------------------
+
+ - The least complicated of all three special operators is the execution operator, which is ` - a back tick.
+ - Back ticks are used very rarely in normal typing, so you might have trouble finding where yours is -
+   it is almost certainly to the left of your 1 key on your keyboard.
+
+ - It allows you to pass commands direct to the operating system for execution, then capture the results.
+
+For example:
+
+	print `ls`;
+
+That will run the command "ls" and output its results to the screen. 
+If you are using Windows, you will need to use "dir" instead, as "ls" is only available on Unix.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+-------Parameters/Arguments-------------------------------------------------------------------------------------------------------------------
+
+ Parameters are the variables listed in a function declaration that define what values must be passed in to a function, 
+ whereas the actual parameters passed in during a function call are called arguments.
+
+
+ When you pass a parameter to a function, PHP actually takes a copy, and uses the copy inside the function. 
+ This means that variables you have passed into a function can be changed as often as you like inside that function and they will remain 
+ untouched outside the function
+ 
+ 	somefunc($foo);
+ 
+ To change this behaviour, you can opt to pass a variable in as a reference:
+
+ 	somefunc(&$foo);
+
+ any changes you make to that variable will still be there when the function exits.
+
+
+---------Prototype(function)
+
+ Optional parameter  [] :
+
+ 	string sha1 ( string source [, bool raw_output])
+
+  -sha1() returns a string, takes a string as its first parameter, with a boolean as its second parameter. 
+   However, the boolean is in brackets - this has a special meaning, which is "this is an optional parameter".
+
+
+
+ The final convention used in function prototypes is "...", which means "a variable number of parameters are taken". 
+ For example, the prototype for the isset() function is this:
+
+	bool isset ( mixed var [, mixed var [, mixed ...]])
+
+ There it takes a minimum of one variable, but it can accept many because of the optional "...".
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Working with variables-----------------------------------------------------------------------------------------------------------------
+
+
+ There are three very basic functions that help you use variables, and these are isset(), empty(), and unset().
+
+	bool isset ( mixed var [, mixed var [, mixed ...]])
+	void unset ( mixed var [, mixed var [, mixed ...]])
+	bool empty ( mixed var)
+
+
+ isset() will return true if a variable, passed in as its only parameter, has been set in the script already
+
+ unset() removes an existing variable entirely, so that isset() will return false.
+
+ empty(), which also takes a variable as its sole parameter, will return true if the variable has a false value.
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Controlling script execution-----------------------------------------------------------------------------------------------------------
+
+	void exit ( [mixed status])
+	mixed eval ( [string code_string])
+	void die ( [mixed status])
+
+
+ - Exit() takes just one optional parameter, and terminates execution of the script immediately. 
+   If you pass a parameter, this is used as the script exit code, and, if it is a string, is printed out.
+
+ - Note that the function die() is an alias of the exit() function and works the same way.
+
+ - Eval() is another function that takes one string parameter, but it executes that string as if it were PHP code.
+ 
+    $str = "exit()";
+    eval($str);
+
+
+ - Eval() might seem a little pointless to you, but it is actually very helpful - it allows you to pass in any text string as PHP code and 
+   have it executed. 
+   This allows you to store your PHP code in a database, or to calculate it on the fly, which gives you a lot more flexibility.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+-------Reading the current time---------------------------------------------------------------------------------------------------------------
+
+	int time ( )
+	mixed microtime ( [bool get_as_float])
+
+  - Time() takes no parameters, and returns the current timestamp representing the current time.
+
+
+  - Date() takes two parameters, with the second one being optional
+     Parameter one is a special string containing formatting codes for how you want the timestamp converted. 
+     Parameter two is the timestamp you want to convert - if you do not supply it, PHP assumes you want to use the current time.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+-------String manipulation--------------------------------------------------------------------------------------------------------------------
+
+	string substr ( string source, int start [, int length])
+
+ - The substr() function allows you to read just part of a string, and takes a minimum of two parameters - the string to work with, and 
+   where you want to start reading from. 
+   There is an optional third parameter to allow you to specify how many characters you want to read (the length you want to copy)
+
+	$string = "Goodbye, Perl!";    
+        $a = substr($string, 1);        // "oodbye, Perl!"
+        $e = substr($string, 5, 4);     // "ye, "
+        $f = substr($string, 10, 1);    // "e"
+
+        $b = substr($string, 5, -1);    // "ye, Perl"
+    	$c = substr($string, 0, -7);    // "Goodbye"
+
+        $d = substr($string, -5);       // "Perl!"
+
+
+-----Replacing parts of string
+
+	mixed str_replace ( mixed search, mixed replace, mixed source [, int &count])             --> case sensitive
+	mixed str_ireplace ( mixed search, mixed replace, mixed source [, int &count])            --> case insensitive
+
+
+     -Str_replace() takes a minimum of three parameters: what to look for, what to replace it with, and the string to work with. 
+      It also has an optional fourth parameter, which, if passed, will be filled with the number of replacements made
+
+
+	    $string = "An infinite number of monkeys";
+    	    $newstring = str_replace("monkeys", "giraffes", $string);     // $newstring --> "An infinite number of giraffes"
+
+
+
+
+-----Measuring strings
+
+	int strlen ( string source)
+	mixed count_chars ( string string [, int mode])
+	mixed str_word_count ( string string [, int format])
+
+
+ - strlen() - count the number of characters in the string
+
+ - count_chars(), when given a string, returns an array containing the letters used in that string and how many times each letter was used
+
+ - str_word_count() without any parameters returns the number of words used
+
+
+
+-----Finding a string within a string
+
+	int strpos ( string haystack, string needle [, int offset])
+	int stripos ( string haystack, string needle [, int offset])
+
+
+ Strpos()  - returns the index of the first occurrence of a substring within a string.
+ Stripos() - case-insensitive
+
+
+	<?php
+    		$string = "This is a strpos() test";
+    		print strpos($string, "a") . "\n";
+	?>
+
+     -That will return 8, because the first character in "This is a strpos() test" that is a lowercase A is at index 8.
+
+
+	<?php
+    		$string = "This is a strpos() test";
+    		$pos = strpos($string, "This");
+    		if ($pos === false) {
+       	 		print "Not found\n";
+    		} else {
+        		print "Found!\n";
+    		}
+	?>
+
+
+     - If we change our if statement to use === rather than ==, PHP will check the value of 0 and false and find they match (both false), 
+       then check the types of 0 and false, and find that they do not match - the former is an integer, and the latter is a boolean.
+
+
+-----Returning the first occurrence of a string
+
+
+	string strstr ( string haystack, string needle)
+	string stristr ( string haystack, string needle)
+
+
+   strstr()  - finds the first occurrence of a substring (parameter two) inside another string (parameter one), and 
+              returns all characters from the first occurrence to the end of the string. 
+
+   stristr() - case-insensitive
+
+Ex:
+
+
+    $string = "http://www.example.com/mypage.php";
+    $newstring = strstr($string, "www");             //www.example.com/mypage.php
+
+
+
+
+-----Trimming whitespace
+
+	string trim ( string source [, string charlist])
+	string ltrim ( string source [, string charlist])
+	string rtrim ( string source [, string charlist])
+
+ - Trim() is a function to strip whitespace from either side of a string variable, with "whitespace" meaning spaces, new lines, and tabs. 
+   You can pass an optional second parameter to trim() if you want, which should be a string specifying the characters you want it to trim()
+
+
+ - ltrim() and rtrim(), which do the same thing but only trim from the left and right respectively.
+
+Ex:
+ 
+    $a = trim(" testing ");                    // "testing"
+    $b = trim(" testing ", " teng");           // "sti"
+    $c = ltrim(" testing ");                   // "testing "
+
+
+
+-----Changing string case
+
+	string strtoupper ( string source)
+	string strtolower ( string source)
+	string ucfirst ( string source)
+	string ucwords ( string source)
+
+ - strtoupper() - takes one string parameter, and returns that string entirely in uppercase. 
+ - strtolower() -  convert the string to lowercase
+ - ucfirst()    -  convert the first letter of every string to uppercase
+ - ucwords()    -  convert the first letter of every word in the string to uppercase.
+
+-They all take one parameter and return the converted result
+
+
+-----Making a secure data hash
+
+	string sha1 ( string source [, bool raw_output])
+	string password_hash ( string password, int algorithm [, array options])
+	bool password_verify ( string password, string hash)
+
+ - SHA stands for the "Secure Hash Algorithm", and it is a way of converting a string of any size into a 40-bit hexadecimal 
+   number that can be used for verification.
+
+ex:
+
+
+    	print sha1("hello") . "\n";
+    	print sha1("Hello") . "\n";
+    	print sha1("hello") . "\n";
+    	print sha1("This is a very, very, very, very, very, very, very long test");
+
+output:
+
+	aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d
+	f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0
+	aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d
+	66f52c9f1a93eac0630566c9b82b26f91d727001
+
+
+ - password_hash() - has a few advantages over sha1(). First, it generates a different hash for the same string if you run it 
+                     again and again, which means the hash for the password "Frosties" will be different every time.
+
+                   - A second advantage is that password_hash() takes a second parameter that lets you specify the algorithm, 
+                     but you can specify "PASSWORD_DEFAULT" to have it automatically use the recommended algorithm. 
+                     This is an advantage because the algorithm can change over time to be stronger and stronger as needed, 
+                     without you needing to change your code. And don't worry about backwards compatibility: password_hash() 
+                     also saves the algorithm name into its hashes, so it can verify hashes even if the algorithm is changed.
+                     
+ex:
+
+    	echo password_hash("frosties", PASSWORD_DEFAULT), "\n";
+    	echo password_hash("frosties", PASSWORD_DEFAULT), "\n";
+    	echo password_hash("frosties", PASSWORD_DEFAULT), "\n";
+
+
+output:
+
+	$2y$10$qR5hC3OpCiz/fPeP4/04O.lJ0tesCNoL6ieqD9v6bnWbWkv4FcqVe 
+	$2y$10$OefiTIclfHSE4TcdAlM/1.h7ckUxWjDlg3w8xFVM/nk53cL3jAEkO 
+	$2y$10$fj3g2tKkGo6BSKXXEVNtxOwMD8DrXMsS0mINoUP.eX4cA34vHKN/K
+
+
+
+ - password_verify() - which takes a user's plain-text password as its first parameter and a hash to compare as its second value. 
+                       It then hashes the plain-text password using the same random seed as was used in the hash, and returns true if 
+                       they match.
+
+
+ex:
+
+    	$hash = password_hash("frosties", PASSWORD_DEFAULT);
+
+    	if (password_verify("frosties", $hash)) {
+        	echo "Password match!\n";
+    	}
+
+
+output:
+
+	Password match!
+
+
+
+
+-----Alternative data hashing
+
+	string md5 ( string source [, bool raw_output])
+
+ - Although the sha1() function is recommended for hashing data securely, another popular algorithm is MD5, 
+   where the "MD" for Message Digest.
+
+ - the md5() function produces a data hash in exactly the same way as sha1(), with the difference is that it is only 32-bytes long.
+
+ex:
+
+    $md5hash = md5("My string");
+    print $md5hash;
+
+
+
+-----Automatically escaping strings
+
+	string addslashes ( string source)
+	string stripslashes ( string source)
+
+  - Addslashes() - takes a string as its only parameter, and returns the same string with these offending characters escaped so 
+                   that they are safe for use.
+                 - Although you can use addslashes() with databases, it's not recommended because it escapes only quotes, 
+                   which leaves some other potentially dangerous text in your input.
+                  
+  - mysqli_real_escape_string()  - If you're looking to escape strings for databases, you should use mysqli_real_escape_string() or the 
+                                  equivalent for your database.
+
+
+Calling addslashes() repeatedly will add more and more slashes. 
+The reason the number of slashes increases so quickly is because PHP 
+will add a slash before each single quote, as well as slashes before every double quote:
+
+
+  	$string = "I'm a lumberjack and I'm okay!";
+   	$a = addslashes($string);
+   	$b = addslashes($a);
+   	$c = addslashes($b);
+
+output:
+
+	$a: I\'m a lumberjack and I\'m okay!
+	$b: I\\\'m a lumberjack and I\\\'m okay!
+	$c: I\\\\\\\'m a lumberjack and I\\\\\\\'m okay!
+
+
+
+ - stripslashes() - removes one set of slashes
+
+
+-----Pretty-printing numbers
+
+	string number_format ( float number [, int decimal_places])
+	string number_format ( float number, int decimal_places, string decimal_point, string thousands_seperator)
+
+ - if you pass number_format() a parameter of "1234567", it will return "1,234,567". By default, number_format() rounds fractions - 
+   1234567.89 becomes 1,234,568.
+
+
+-----Comparing strings
+
+	int strcmp ( string str1, string str2)
+	int strcasecmp ( string str1, string str2)
+
+ - Strcmp() - quick way of comparing two words and telling whether they are equal, or whether one comes before the other.
+            -  It takes two words for its two parameters, and 
+            returns -1 if word one comes alphabetically before word two, 
+                     1 if word one comes alphabetically after word two, or 
+                     0 if word one and word two are the same.
+
+
+ - using ==, you get a "1" if two strings match, whereas with strcmp() you get a 0, so be careful!
+
+ex:
+
+
+    $string1 = "foo";
+    $string2 = "bar";
+    $result = strcmp($string1, $string2);
+
+    switch ($result) {
+        case -1: print "Foo comes before bar"; break;
+        case 0: print "Foo and bar are the same"; break;
+        case 1: print "Foo comes after bar"; break;
+    }
+
+output:
+
+	Foo comes after bar
+
+
+
+-----Parsing a string into variables
+
+ - QUERY_STRING - If you recall, this is the literal text sent after the question mark in a HTTP GET request, 
+                  which means that if the page requested was "mypage.php?foo=bar&bar=baz", QUERY_STRING is set to "foo=bar&bar=baz".
+
+
+ - parse_str() - function is designed to take a query string like that one and convert it to variables in the same way that PHP does 
+                 when variables come in.
+               - The difference is that variables parsed using parse_str() are converted to global variables, as opposed to 
+                 elements inside $_GET.
+               - Optionally, you can pass an array as the second parameter to parse_str(), and it will put the variables into there.
+
+Ex: 
+
+ URL: mypage.php?foo=bar&bar=baz
+ 
+    if (isset($foo)) {
+        print "Foo is $foo<br />";
+    } else {
+        print "Foo is unset<br />";
+    }
+
+    parse_str("foo=bar&bar=baz");
+
+    if (isset($foo)) {
+        print "Foo is $foo<br />";
+    } else {
+        print "Foo is unset<br />";
+    }
+
+Output:
+
+	Foo is unset
+	Foo is bar
+
+Ex 2:
+
+ URL: mypage.php?foo=bar&bar=baz
+
+    $array = array();
+
+    if (isset($array['foo'])) {
+        print "Foo is {$array['foo']}<br />";
+    } else {
+        print "Foo is unset<br />";
+    }
+ 
+    parse_str("foo=bar&bar=baz", $array);
+
+    if (isset($array['foo'])) {
+        print "Foo is {$array['foo']}<br />";
+    } else {
+        print "Foo is unset<br />";
+    }
+
+Output:
+ 
+	Foo is unset
+	Foo is bar
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+-------Checking whether a function is available-----------------------------------------------------------------------------------------------
+
+
+	bool function_exists ( string function_name)
+
+ - function_exists() - takes a function name as its only parameter, and returns true if that function (either built-in, or 
+                       one you've defined yourself) is available for use.
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------User Function--------------------------------------------------------------------------------------------------------------------------
+
+    function foo() {
+        return 1;    // You're allowed to return one and only one value back from functions, and you do this by using the return statement.
+    }
+
+    print foo();
+
+
+-----Parameters
+
+    function multiply($num1, $num2) {
+        $total = $num1 * $num2;
+        return $total;
+    }
+
+    $mynum = multiply(5, 10);
+
+
+-----Default parameters
+
+
+    function doFoo($Name = "Paul") {
+        return "Foo $Name!\n";
+    }
+
+    doFoo();
+    doFoo("Paul");
+    doFoo("Andrew");
+
+
+output:
+
+Foo Paul!
+Foo Paul!
+Foo Andrew!
+
+ Note: you cannot put a default value before a non-default value
+
+
+-----Passing by reference
+
+ - Marking a variable as "passed by reference" is done in the function definition, not in the function call. That is:
+ 	
+ 	function multiply(&$num1, &$num2) {
+
+ Wrong:
+
+        $mynum = multiply(&5, &10);
+
+
+
+-----Returning by reference
+
+A final important thing to know about user functions and references is how to return values by reference. 
+Unlike passing values by reference where you just specify the referenced nature of the parameter in the function definition, 
+to properly return references you need to specify in the definition and at call time. 
+To specify a function returns a reference, you place the ampersand reference operator before the function name, 
+and to specify that you wish to reference the result of the function as opposed to copying it, 
+you use the normal reference assign that you learnt earlier.
+
+
+<?php
+    function &square1($number) {
+        return $number * $number;
+    }
+
+    $val =& square1(10);
+?>
+
+
+In that example we do not pass any parameters in by reference, but we do pass back and assign a reference. 
+With that code, you could remove the references entirely and it would still do exactly the same thing. 
+However, the ability to return references becomes more important if, say, you were to return an element in an array - with references, 
+you could change the element that gets returned, and it would change the array; without, you would get a copy of the element back, 
+and any changes you made would not be reflected in the original.
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+-------Arrays---------------------------------------------------------------------------------------------------------------------------------
+
+ - An array is a normal PHP variable like any others, but it works like a container - you can put other variables inside it
+
+ - Each variable inside an array is called an element . Each element has a key and a value , which can be any other variable.
+
+ex:
+
+
+ 	$myarray = array("Apples", "Oranges", "Pears");
+ 	$myarray = ["Apples", "Oranges", "Pears"];
+
+replace the default keys ( associative array ):
+
+ 	$myarray = array("a"=>"Apples", "b"=>"Oranges", "c"=>"Pears");
+
+
+-----Add element to array
+
+    $array[] = "Foo";
+    $array[] = "Bar";
+    $array[] = "Baz";
+
+OR:
+
+    $array["a"] = "Foo";
+    $array["b"] = "Bar";
+    $array["c"] = "Baz";
+
+
+-----Two ways of iterating through arrays
+
+
+one:
+
+	foreach($array as $val) {
+    		print $val;
+	}
+
+
+two:
+
+
+	foreach ($array as $key => $val) {
+    		print "$key = $val\n";
+	}
+
+
+
+-----Chopping and changing arrays
+
+	array array_diff ( array array1, array array2 [, array ...])
+	array array_intersect ( array array1, array array2 [, array ...])
+	array array_merge ( array array1, array array2 [, array ...])
+
+There are three key functions that handle the comparison of two arrays to create a new array:
+
+ * they take a minimum of two arrays as parameters (we will call them $arr1 and $arr2), and return an array for a result
+
+ - array_diff()      - returns a new array containing all the values of $arr1 that do not exist in $arr2
+ 
+ - array_intersect() -  returns a new array containing all the values of $arr1 that do exist in $arr2
+
+ - array_merge()     - just combines the two arrays
+
+
+
+
+
+-----Stripping out duplicate values (array_unique)
+
+	$toppings2 = array("Peppers", "Ham", "Cheese", "Peppers");
+
+        $toppings2 = array_unique($toppings2);
+
+
+
+-----Converting an array to individual variables
+
+	int extract ( array source [, int extract_type [, string prefix]])
+
+ - Extract() is a very popular function that converts elements in an array into variables in their own right. 
+   Extract takes a minimum of one parameter, an array, and returns the number of elements extracted.
+
+Ex:
+
+    $Wales = 'Swansea';
+    $capitalcities['England'] = 'London';
+    $capitalcities['Scotland'] = 'Edinburgh';
+    $capitalcities['Wales'] = 'Cardiff';
+    extract($capitalcities);
+    print $Wales;
+
+
+ - After calling extract, the "England", "Scotland", and "Wales" keys become variables in their own right ($England, $Scotland, and $Wales), 
+   with their values set to "London", "Edinburgh", and "Cardiff" respectively.
+
+ - By default, extract() will overwrite any existing variables, meaning that $Wales's original value of "Swansea" will be overwritten 
+   with "Cardiff".
+   This behaviour can be altered using the second parameter, and averted using the third parameter.
+
+
+
+-----Checking whether an element exists
+
+	bool in_array ( mixed needle, array haystack [, bool strict])
+
+
+ - in_array() function does precisely what you might think - if you pass it a value and an array it will return true if the value is in 
+   the array, otherwise false.
+
+
+    $needle = "Sam";
+    $haystack = array("Johnny", "Timmy", "Bobby", "Sam", "Tammy", "Danny", "Joe");
+
+    if (in_array($needle, $haystack)) {
+        print "$needle is in the array!\n";
+    } else {
+        print "$needle is not in the array\n";
+    }
+
+
+ - In_array() has an optional boolean third parameter (set to false by default) that defines whether you want to use strict checking or not. 
+   If parameter three is set to true, PHP will only return true if the value is in the array and it is of the same type - that is, 
+   if they are identical in the same way as the === operator (three equals signs).
+
+
+-----Using an array as a double-ended queue ()
+
+	mixed array_shift ( array array)
+	int array_unshift ( array array, mixed var [, mixed ...])
+	int array_push ( array array, mixed var [, mix ...])
+	mixed array_pop ( array array)
+
+ - Array_shift() - takes an array as its only parameter, and returns the value from the front of the array while also removing 
+   it from the array.
+
+ - Array_pop()   -  same as array_shift() but remove an element from the end of an array
+
+ - array_unshift() and array_push() -  place an element into an array at the start or at the end respectively
+ 
+ 
+
+-----Sorting arrays
+
+	bool asort ( array input [, int sort_flags])
+	bool ksort ( array input [, int sort_flags])
+	bool arsort ( array input [, int sort_flags])
+	bool krsort ( array input [, int sort_flags])
+ 
+ - asort() sorts an array by its values, whereas 
+ - ksort() sorts an array by its keys.
+
+ - arsort() and krsort(), which reverse sort the array and reverse sort the array by key respectively.
+
+
+-----print_r() / var_dump()
+ 
+ - print_r() -  takes just one parameter, but it outputs detailed information about a variable, such as it is type, length, and contents.
+ - var_dump() - same as print_r(),  but 
+                                   a) prints out sizes of variables,
+                                   b) does not print out non-public data in objects, and 
+                                   c) does not have the option to pass a second parameter to return its output.
+
+
+ - The var_dump() function is a great way to see what is inside your variables, whether they are arrays or not - make liberal use of it when    debugging to save headaches!
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+-------Objects--------------------------------------------------------------------------------------------------------------------------------
+
+-----Defining a class
+
+	class dog {
+    		public function bark() {
+        		print "Woof!\n";
+    		}
+	}
+
+
+-----Basic inheritance
+
+	class dog {
+    		public function bark() {
+        		print "Woof!\n";
+    		}
+	}
+
+	class poodle extends dog {
+    		// nothing new yet
+	}
+
+
+-----Overriding functions
+
+	class dog {
+    		public function bark() {
+        		print "Woof!\n";
+    		}
+	}
+
+
+	class poodle extends dog {
+    		public function bark() {
+        		print "Yip!\n";
+    		}
+	}
+
+
+
+-----Instance of the class
+
+    	class dog {
+        	public function bark() {
+            		print "Woof!\n";
+        	}
+    	}
+
+    	class poodle extends dog {
+        	public function bark() {
+            		print "Yip!\n";
+        	}
+    	}
+
+    	$poppy = new poodle;
+    	$poppy->bark();
+
+
+-----Access control modifiers
+
+        Public: This variable or function can be used from anywhere in the script
+
+        Private: This variable or function can only be used by the object it is part of; it cannot be accessed elsewhere
+
+        Protected: This variable or function can only be used by the object it is part of, or descendents of that class
+
+        Final: This variable or function cannot be overridden in inherited classes
+
+        Abstract: This function or class cannot be used directly - you must inherit from them first
+
+
+-----Iterating through object variables
+
+
+    class person {
+        public $FirstName = "Bill";
+        public $MiddleName = "Terence";
+        public $LastName = "Murphy";
+        private $Password = "Poppy";
+        public $Age = 29;
+        public $HomeTown = "Edinburgh";
+        public $FavouriteColour = "Purple";
+
+        public function outputVars() {
+            foreach($this as $var => $value) {
+                echo "$var is $value\n";
+            }
+        }
+    }
+
+    $bill = new person();
+    $bill->outputVars();
+
+output:
+
+    FirstName is Bill
+    MiddleName is Terence
+    LastName is Murphy
+    Password is Poppy
+    Age is 29
+    HomeTown is Edinburgh
+    FavouriteColour is Purple
+
+
+OR (doesnt output private var:)
+
+
+    class person {
+        public $FirstName = "Bill";
+        public $MiddleName = "Terence";
+        public $LastName = "Murphy";
+        private $Password = "Poppy";
+        public $Age = 29;
+        public $HomeTown = "Edinburgh";
+        public $FavouriteColour = "Purple";
+    }
+
+    $bill = new person();
+
+    foreach($bill as $var => $value) {
+        echo "$var is $value\n";
+    }
+
+
+output:
+
+    FirstName is Bill
+    MiddleName is Terence
+    LastName is Murphy
+    Age is 29
+    HomeTown is Edinburgh
+    FavouriteColour is Purple
+
+
+
+-----Object type information
+
+ "instanceof" - can be used like an operator
+              - will return true if the object on the left-hand side is of the same class or a descendant of the class 
+                given on the right-hand side.
+
+ex:
+
+	if ($poppy instanceof poodle) { }
+	if ($poppy instanceof dog) { }
+
+
+
+-----Constructors
+
+    class dogtag {
+        public $Words;
+    }
+    
+    class dog {
+        public $Name;
+        public $DogTag;
+
+        public function bark() {
+            print "Woof!\n";
+        }
+        
+        public function __construct($DogName) {
+            print "Creating $DogName\n";
+            $this->Name = $DogName;
+            $this->DogTag = new dogtag;
+            $this->DogTag->Words = "My name is $DogName. If you find me, please call 555-1234";
+        }
+    }
+    
+    class poodle extends dog {
+        public function bark() {
+            print "Yip!\n";
+        }
+    }
+    
+    $poppy = new poodle("Poppy");
+    print $poppy->DogTag->Words . "\n";
+
+
+There are three important things to note:
+
+1. The constructor is not in the poodle class - it is in the dog class. What happens is that PHP looks for a constructor in poodle, 
+                                             and if it fails to find one there, it goes to its parent class (where poodle inherited from), 
+                                             and if it fails to find one there, it goes up again, and up again, ad infinitum, until it 
+                                             reaches the top of the class structure. As the dog class is the top of our class structure, 
+                                             PHP does not have far to go.
+
+2. PHP only ever calls one constructor for you. If you have several constructors in a class structure, PHP will only call the first one it finds.
+
+3. The __construct() function is marked public - that's not by accident. 
+                                              If you don't mark the constructor as public you can only instantiate objects of                                               a class from within the class itself, which is almost an oxymoron. 
+                                              If you make this private, you need to use a static function call - quite messy, 
+                                              but used in some places.
+
+
+-----Parent constructors
+
+class poodle extends dog {
+    public function bark() {
+        print "Yip!\n";
+    }
+    
+    public function __construct($DogName) {
+        parent::__construct($DogName);
+        print "Creating a poodle\n";
+    }
+}
+
+
+
+ - parent::__construct() -  The "parent" part means "get the parent of this object, and use it", and the __construct() part means 
+                            "call the construct function"
+
+
+-----Destructors
+
+ - class destructors - a function to be called when an object is deleted.
+                     - PHP calls destructors as soon as objects are no longer available, and the destructor function, __destruct(), 
+                       takes no parameters.
+
+ex:
+
+	public function __destruct() {
+    		print "{$this->Name} is no more...\n";
+	}
+
+
+-----Deleting objects
+ 
+   - unset($object)
+   - Calling unset() on an object will call its destructor before deleting the object, as you would expect.
+
+ 
+
+
+-----Magic functions
+
+ - Whenever you see a function name start with a double-underscore, it is a "magic" function - 
+   one that PHP has provided that you have not declared yourself.
+
+
+ - __autoload() - This global function is called whenever you try to create an object of a class that hasn't been defined.
+
+ - __get()      - This is the first of three slightly unusual magic functions, and allows you to specify what to do if an 
+                  unknown class variable is read from within your script.
+
+ - __set()      -  it is called whenever an undefined class variable is set in your scripts.
+
+
+ - __call()     - The call() magic function is to class functions what __get() is to class variables - if you call meow() on an object 
+                  of class dog, PHP will fail to find the function and check whether you have defined a __call() function.
+
+
+ - __toString() -  allows you to set a string value for the object that will be used if the object is ever used as a string.
+
+
+
+
+-----Static data
+
+ - you can declare functions and variables from a class as "static", meaning that they are always available.
+
+ - For example, if we wanted our bark() function to be called as if it were a normal function, we could declare it static. 
+   That way, we could call bark() directly from the script without the need for any dog objects.
+
+ - You can also make class variables static, which results in there being only one of that variable for the entire class - 
+   all objects share that one variable.
+   Ex:
+
+    class employee {
+        static public $NextID = 1;
+    }
+    print employee::$NextID . "\n";
+
+
+-----Helpful utility functions
+
+ class_exists()         - returns true if the specified class has been declared
+
+ get_class()            - returns the class name of the object you pass to it
+
+ get_declared_classes() - returns an array of all classes that you can currently create an object of
+
+
+-----Interfaces
+
+ - a technique known as multiple inheritance
+
+Ex:
+
+    interface boat {
+        function sink();
+        function scuttle();
+        function dock();
+    }
+
+    interface plane {
+        function takeoff();
+        function land();
+        function bailout();
+    }
+
+    class boatplane implements boat, plane {
+        public function sink() { }
+        public function scuttle() { }
+        public function dock() { }
+        public function takeoff() { }
+        public function land() { }
+        public function bailout() { }
+    }
+
+    $obj = new boatplane();
+
+
+
+
+
+OR ( best ) 
+
+    interface boat {
+        function sink();
+        function scuttle();
+        function dock();
+    }
+
+    interface plane extends boat {
+        function takeoff();
+        function land();
+        function bailout();
+    }
+
+    class boatplane implements plane {
+        public function sink() { }
+        public function scuttle() { }
+        public function dock() { }
+        public function takeoff() { }
+        public function land() { }
+        public function bailout() { }
+    }
+
+    $obj = new boatplane();
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+-------Form-----------------------------------------------------------------------------------------------------------------------------------
+
+<form action="someform.php" method="post">
+	Name: <input type="text" name="Name" value="Jim" /><br />
+	Password: <input type="PASSWORD" name="Password" /><br />
+	Age: <input type="text" name="Age" /><br />
+	<input type="submit" />
+</form>
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------Databases------------------------------------------------------------------------------------------------------------------------------
+
+-----Mysql
+
+	mysql -u root -p ---> at command line. 
+
+-----Connect_from_php
+
+resource mysqli_connect ( [string server [, string username [, string password [, string database_name [, int port_number [, string socket]]]]]])
+
+
+    $db = mysqli_connect("localhost", "phpuser", "alm65z", "phpdb");
+    $result = mysqli_query($db, "SELECT * FROM usertable");
+    $numrows = mysqli_num_rows($result);
+    print "There are $numrows people in usertable\n";
+
+
+    # close_connection
+    mysqli_close($db);
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+-------Using Cookies/Sessions-----------------------------------------------------------------------------------------------------------------
+
+-----Cookies
+
+ bool setcookie ( string name [, string value [, int expire [, string path [, string domain [, int secure]]]]])
+
+
+    if (!isset($_COOKIE['Ordering'])) {
+        setcookie("Ordering", $_POST['ChangeOrdering'], time() + 31536000);
+    }
+
+
+-----Sessions
+
+        session_start();
+	$_SESSION['FirstName'] = "Jim";
+        print $_SESSION['FirstName'];
+
+     #remove session
+        unset($_SESSION['foo'])
+
+
+     # end session        
+   	session_start();
+    	$_SESSION = array();
+    	session_destroy();
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------XML------------------------------------------------------------------------------------------------------------------------------------
+
+-----employees.xml
+
+<employees>
+    <employee>
+        <name>Anthony Clarke</name>
+        <title>Chief Information Officer</title>
+        <age>48</age>
+    </employee>
+
+    <employee>
+        <name>Laura Pollard</name>
+        <title>Chief Executive Officer</title>
+        <age>54</age>
+    </employee>
+</employees>
+
+--------------------------------------------------SimpleXML
+
+-----simplexml_load_file()
+
+ -simplexml_load_file() - opens the XML file specified in parameter one, and returns it as a parsed XML element.
+
+Ex:
+
+    $employees = simplexml_load_file('employees.xml');
+
+    foreach ($employees->employee as $employee) {
+        print "{$employee->name} is {$employee->title} at age {$employee->age}\n";
+    }
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
