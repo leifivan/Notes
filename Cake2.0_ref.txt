@@ -1,0 +1,1607 @@
+
+-------------Install via composer--------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+ composer create-project --prefer-dist cakephp/cakephp:"~2.0" app_name
+
+ - change value of Security.salt and security.cipherseed
+
+ - configure database connection app/config/database.php (change database.php.default to database.php)
+
+ - Install DebugKit:
+   
+	1. add this to app/composer.json :
+
+		    "require": {
+        		"cakephp/debug_kit": "2.2.*"
+    		     }
+
+        2. app/Config/bootstrap.php, add (or un-comment) the following line:
+		
+		CakePlugin::load('DebugKit');
+
+        3. app/Controller/AppController.php file (within the class), add:
+
+		public $components = array(
+    			'DebugKit.Toolbar'
+		);
+
+	4. In your Config/core.php file, make sure debug is 1 or more:
+
+		Configure::write('debug', 2);
+
+	5. Remove sql_dump (app/view/layouts/default.ctp at the bottom) :
+		
+		<?php echo $this->element('sql_dump'); ?>
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------------Simple Blog-----------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+--Schema:
+
+CREATE TABLE posts (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    
+			title VARCHAR(50),
+    
+			body TEXT,
+    
+			created DATETIME DEFAULT NULL,
+
+			modified DATETIME DEFAULT NULL
+);
+
+INSERT INTO posts (title, body, created)
+    VALUES ('The title', 'This is the post body.', NOW());
+
+INSERT INTO posts (title, body, created)
+    VALUES ('A title once again', 'And the post body follows.', NOW());
+
+INSERT INTO posts (title, body, created)
+    VALUES ('Title strikes back', 'This is really exciting! Not.', NOW());
+
+
+
+--MODEL
+
+ - /app/Model/Post.php. 
+
+<?php
+
+	class Post extends AppModel {
+    		public $validate = array(
+        				'title' => array(
+            					'rule' => 'notBlank'
+        				),
+        				'body' => array(
+            					'rule' => 'notBlank'
+        				)
+    		);
+	}
+
+--CONTROLLER
+
+ - /app/Controller/PostsController.php
+
+<?php
+
+class PostsController extends AppController {
+    public $helpers = array('Html', 'Form', 'Flash');
+    public $components = array('Flash');
+
+    public function index(){
+        $this->set('posts', $this->Post->find('all'));
+    }
+
+    public function view($id = null) {
+      if (!$id) {
+        throw new NotFoundException(__('Invalid post'));
+      }
+      $post = $this->Post->findById($id);
+      if (!$post) {
+          throw new NotFoundException(__('Invalid post'));
+      }
+      $this->set('post', $post);
+    }
+
+    public function add() {
+        if ($this->request->is('post')) {
+            $this->Post->create();
+            if ($this->Post->save($this->request->data)) {
+                $this->Flash->success(__('Your post has been saved.'));
+                return $this->redirect(array('action' => 'index'));
+            }
+            $this->Flash->error(__('Unable to add your post.'));
+        }
+    }
+
+    public function edit($id = null) {
+        if (!$id) {
+            throw new NotFoundException(__('Invalid post'));
+        }
+
+        $post = $this->Post->findById($id);
+        if (!$post) {
+            throw new NotFoundException(__('Invalid post'));
+        }
+
+        if ($this->request->is(array('post', 'put'))) {
+            $this->Post->id = $id;
+            if ($this->Post->save($this->request->data)) {
+                $this->Flash->success(__('Your post has been updated.'));
+                return $this->redirect(array('action' => 'index'));
+            }
+            $this->Flash->error(__('Unable to update your post.'));
+        }
+
+        if (!$this->request->data) {
+            $this->request->data = $post;
+        }
+    }
+
+    public function delete($id) {
+        if ($this->request->is('get')) {
+            throw new MethodNotAllowedException();
+        }
+
+        if ($this->Post->delete($id)) {
+            $this->Flash->success(
+                __('The post with id: %s has been deleted.', h($id))
+            );
+        } else {
+            $this->Flash->error(
+                __('The post with id: %s could not be deleted.', h($id))
+            );
+        }
+
+        return $this->redirect(array('action' => 'index'));
+    }
+    
+
+}
+
+
+
+--VIEW
+
+ - /app/View/Posts/index.ctp
+
+<!-- File: /app/View/Posts/index.ctp -->
+
+<h1>Blog posts</h1>
+<p><?php echo $this->Html->link('Add Post', array('action' => 'add')); ?></p>
+<table>
+    <tr>
+        <th>Id</th>
+        <th>Title</th>
+        <th>Actions</th>
+        <th>Created</th>
+    </tr>
+
+<!-- Here's where we loop through our $posts array, printing out post info -->
+
+    <?php foreach ($posts as $post): ?>
+    <tr>
+        <td><?php echo $post['Post']['id']; ?></td>
+        <td>
+            <?php
+                echo $this->Html->link(
+                    $post['Post']['title'],
+                    array('action' => 'view', $post['Post']['id'])
+                );
+            ?>
+        </td>
+        <td>
+            <?php
+                echo $this->Form->postLink(
+                    'Delete',
+                    array('action' => 'delete', $post['Post']['id']),
+                    array('confirm' => 'Are you sure?')
+                );
+            ?>
+            <?php
+                echo $this->Html->link(
+                    'Edit', array('action' => 'edit', $post['Post']['id'])
+                );
+            ?>
+        </td>
+        <td>
+            <?php echo $post['Post']['created']; ?>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+
+</table>
+
+
+ - /app/View/Posts/view.ctp
+
+<!-- File: /app/View/Posts/view.ctp -->
+
+<h1><?php echo h($post['Post']['title']); ?></h1>
+
+<p><small>Created: <?php echo $post['Post']['created']; ?></small></p>
+
+<p><?php echo h($post['Post']['body']); ?></p>
+
+
+ - /app/View/Posts/add.ctp
+
+<!-- File: /app/View/Posts/add.ctp -->
+
+<h1>Add Post</h1>
+<?php
+echo $this->Form->create('Post');
+echo $this->Form->input('title');
+echo $this->Form->input('body', array('rows' => '3'));
+echo $this->Form->end('Save Post');
+?>
+
+ - /app/View/Posts/edit.ctp
+
+<h1>Edit Post</h1>
+<?php
+echo $this->Form->create('Post');
+echo $this->Form->input('title');
+echo $this->Form->input('body', array('rows' => '3'));
+echo $this->Form->input('id', array('type' => 'hidden'));
+echo $this->Form->end('Save Post');
+?>
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-------------HtmlHelper class------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+$this->Html->link() -  will generate an HTML link with the given title (the first parameter) and URL (the second parameter).
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+-------------MODEL-----------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+- Simple example of a model definition in CakePHP:
+
+	App::uses('AppModel', 'Model');
+	class Ingredient extends AppModel {
+	    public $name = 'Ingredient';
+	}
+
+     * The Ingredient model extends the application model, AppModel, which in turn extends CakePHPÅfs internal Model class. 
+       It is this core Model class that bestows the functionality onto your Ingredient model.
+
+     * App::uses('AppModel', 'Model') ensures that the model is loaded when it is needed.
+
+
+- When your model is defined, it can be accessed from within your Controller. 
+  CakePHP will automatically make the model available for access when its name matches that of the controller.
+  For example, a controller named IngredientsController will automatically initialize the Ingredient model 
+  and attach it to the controller at $this->Ingredient:
+
+
+	class IngredientsController extends AppController {
+	    public function index() {
+	        //grab all ingredients and pass it to the view:
+	        $ingredients = $this->Ingredient->find('all');
+	        $this->set('ingredients', $ingredients);
+	    }
+	}
+
+
+-----Associations (one to one, one to many, many to one, many to many)----------------
+
+
+-------hasOne (One to one)
+
+	      Relation               Schema 
+
+	Apple hasOne Banana	bananas.apple_id
+	User hasOne Profile	profiles.user_id
+	Doctor hasOne Mentor	mentors.doctor_id
+
+
+- To define the ÅeUser hasOne ProfileÅf association, add the $hasOne property to the model class.
+  Remember to have a Profile model in /app/Model/Profile.php, or the association wonÅft work:
+
+	class User extends AppModel {
+	    public $hasOne = 'Profile';
+	}
+
+- There are two ways to describe this relationship in your model files. 
+  The simplest method is to set the $hasOne attribute to a string containing the class name of the associated model, as weÅfve done above.
+
+  If you need more control, you can define your associations using array syntax. 
+  For example, you might want to limit the association to include only certain records.
+
+	class User extends AppModel {
+	    public $hasOne = array(
+	        'Profile' => array(
+	            'className' => 'Profile',
+	            'conditions' => array('Profile.published' => '1'),
+	            'dependent' => true
+	        )
+	    );
+	}
+
+  Possible keys for hasOne association arrays include:
+
+  className  - the class name of the model being associated to the current model. 
+               If youÅfre defining a ÅeUser hasOne ProfileÅf relationship, the className key should equal ÅeProfileÅf.
+
+  foreignKey - the name of the foreign key found in the other model. This is especially handy if you need to define 
+               multiple hasOne relationships. The default value for this key is the underscored, singular name of the current model, 
+               suffixed with Åe_idÅf. In the example above, it would default to Åeuser_idÅf.
+
+  conditions - an array of find()-compatible conditions or SQL strings such as array(ÅeProfile.approvedÅf => true)
+
+  fields     - A list of fields to be retrieved when the associated model data is fetched. Returns all fields by default.
+
+  order      - an array of find()-compatible order clauses or SQL strings such as array(ÅeProfile.last_nameÅf => ÅeASCÅf)
+
+  dependent  - When the dependent key is set to true, and the modelÅfs delete() method is called with the 
+               cascade parameter set to true, associated model records are also deleted. 
+               In this case, we set it true so that deleting a User will also delete her associated Profile.
+
+
+  Once this association has been defined, 
+  find operations on the User model will also fetch a related Profile record if it exists:
+
+	//Sample results from a $this->User->find() call.
+
+	Array
+	(
+	    [User] => Array
+	        (
+	            [id] => 121
+	            [name] => Gwoo the Kungwoo
+	            [created] => 2007-05-01 10:31:01
+	        )
+	    [Profile] => Array
+	        (
+	            [id] => 12
+	            [user_id] => 121
+	            [skill] => Baking Cakes
+	            [created] => 2007-05-01 10:31:01
+	        )
+	)
+
+
+
+-------belongsTo (many to one)
+
+ - Now that we have Profile data access from the User model, let's define a belongsTo association in the Profile model
+   in order to get access to related User data. The belongsTo association is a natural complement to the hasOne and hasMany
+   associations: it allows us to see the data from the direction.
+
+ * If a model(table) contains a foreign key, it belongsTo the other model(table).
+ 
+
+ We can define the belongsTo association in our Profile model at 
+ /app/Model/Profile.php using the string syntax as follows:
+ 
+	class Profile extends AppModel {
+	    public $belongsTo = 'User';
+	}
+
+ We can also define a more specific relationship using array syntax:
+
+	class Profile extends AppModel {
+	    public $belongsTo = array(
+	        'User' => array(
+	            'className' => 'User',
+	            'foreignKey' => 'user_id'
+	        )
+	    );
+	}
+ 
+ Possible keys for belongsTo association arrays include:
+
+ className    - the class name of the model being associated to the current model. 
+                If youÅfre defining a ÅeProfile belongsTo UserÅf relationship, the className key should equal ÅeUserÅf.
+
+ foreignKey   - the name of the foreign key found in the current model. This is especially handy if you need to define 
+                multiple belongsTo relationships. 
+                The default value for this key is the underscored, singular name of the other model, suffixed with _id.
+
+ conditions   - an array of find() compatible conditions or SQL strings such as array('User.active' => true)
+
+ type         - the type of the join to use in the SQL query. The default is ÅeLEFTÅf, which may not fit your needs in all situations. 
+                The value ÅeINNERÅf may be helpful (when used with some conditions) when you want everything from your main and 
+                associated models or nothing at all.
+
+ fields       - A list of fields to be retrieved when the associated model data is fetched. Returns all fields by default.
+
+ order        - an array of find() compatible order clauses or SQL strings such as array('User.username' => 'ASC')
+
+ counterCache - If set to true, the associated Model will automatically increase or decrease the Åg[singular_model_name]_countÅh field 
+                in the foreign table whenever you do a save() or delete(). 
+                If itÅfs a string, then itÅfs the field name to use. The value in the counter field represents the number of 
+                related rows. You can also specify multiple counter caches by defining an array.
+
+ counterScope - Optional conditions array to use for updating counter cache field.
+
+
+ * counterCache - Cache your count()
+
+   - This feature helps you cache the count of related data. Instead of counting the records manually via find('count'), 
+     the model itself tracks any addition/deletion towards the associated $hasMany model and increases/decreases a dedicated 
+     integer field within the parent model table.
+  
+     LetÅfs say you have a model called ImageComment and a model called Image. 
+     You would add a new INT-field to the images table and name it image_comment_count.
+
+     Once you have added the counter field, you are good to go. Activate counter-cache in your association by adding a 
+     counterCache key and set the value to true:
+
+	class ImageComment extends AppModel {
+	    public $belongsTo = array(
+	        'Image' => array(
+	            'counterCache' => true,
+	        )
+	    );
+	}
+    
+    From now on, every time you add or remove a ImageComment associated to Image, 
+    the number within image_comment_count is adjusted automatically.
+
+
+ * counterScope (for counterCache)
+
+   - You can also specify counterScope. It allows you to specify a simple condition which tells the model when to update 
+     (or when not to, depending on how you look at it) the counter value.
+ 
+     Using our Image model example, we can specify it like so:
+
+	class ImageComment extends AppModel {
+	    public $belongsTo = array(
+	        'Image' => array(
+	            'counterCache' => 'active_comment_count', //custom field name
+	            // only count if "ImageComment" is active = 1
+	            'counterScope' => array(
+	              'ImageComment.active' => 1
+	            )
+	        )
+	    );
+	}
+
+
+-------hasMany(one to many)
+
+   - We can define the hasMany association in our User model at /app/Model/User.php using the string syntax as follows:
+
+	class User extends AppModel {
+	    public $hasMany = 'Comment';
+	}
+
+     We can also define a more specific relationship using array syntax:
+
+	class User extends AppModel {
+	    public $hasMany = array(
+	        'Comment' => array(
+	            'className' => 'Comment',
+	            'foreignKey' => 'user_id',
+	            'conditions' => array('Comment.status' => '1'),
+	            'order' => 'Comment.created DESC',
+	            'limit' => '5',
+	            'dependent' => true
+	        )
+	    );
+	}
+
+     Possible keys for hasMany association arrays include:
+
+     className     - the class name of the model being associated to the current model. 
+                     If youÅfre defining a ÅeUser hasMany CommentÅf relationship, the className key should equal ÅeComment.Åf
+
+
+     foreignKey    - the name of the foreign key found in the other model. This is especially handy if you need to define 
+                     multiple hasMany relationships. The default value for this key is the underscored, singular name of 
+                     the actual model, suffixed with Åe_idÅf.
+
+     conditions    - an array of find() compatible conditions or SQL strings such as array(ÅeComment.visibleÅf => true)
+
+     order         - an array of find() compatible order clauses or SQL strings such as array(ÅeProfile.last_nameÅf => ÅeASCÅf)
+
+     limit         - The maximum number of associated rows you want returned.
+
+     offset        - The number of associated rows to skip over (given the current conditions and order) 
+                     before fetching and associating.
+
+     dependent     - When dependent is set to true, recursive model deletion is possible. 
+                     In this example(above), Comment records will be deleted when their associated User record has been deleted.
+
+     exclusive     - When exclusive is set to true, recursive model deletion does the delete with a deleteAll() call, 
+                     instead of deleting each entity separately. This greatly improves performance, 
+                     but may not be ideal for all circumstances.
+
+     finderQuery   - A complete SQL query CakePHP can use to fetch associated model records. 
+                     This should be used in situations that require highly customized results.                      If a query youÅfre building requires a reference to the associated model ID, use the special {$__cakeID__$} marker in the query. 
+                     For example, if your Apple model hasMany Orange, the query should look something like this: 
+                     SELECT Orange.* from oranges as Orange WHERE Orange.apple_id = {$__cakeID__$};
+
+--------------------------------------------------------------------------------------
+
+
+
+
+
+------Retrieving Your Data------------------------------------------------------------
+
+-find(string $type = 'first', array $params = array())
+   
+   - Model::find() = the most common function you will use in models.
+  
+     $type can be 'all', 'first', 'count', 'list', 'neighbors' or 'threaded', or any custom finder you can define. 
+     Keep in mind that $type is case-sensitive.
+
+     $params is used to pass all parameters to the various types of find(), and has the following possible keys by default, 
+     all of which are optional:
+
+	array(
+	    'conditions' => array('Model.field' => $thisValue), //array of conditions
+	    'recursive' => 1, //int
+	    //array of field names
+	    'fields' => array('Model.field1', 'DISTINCT Model.field2'),
+	    //string or array defining order
+	    'order' => array('Model.created', 'Model.field3 DESC'),
+	    'group' => array('Model.field'), //fields to GROUP BY
+	    'limit' => n, //int
+	    'page' => n, //int
+	    'offset' => n, //int
+	    'callbacks' => true //other possible values are false, 'before', 'after'
+	)
+
+     ItÅfs also possible to add and use other parameters. Some types of find() and behaviors make use of this ability, 
+     and your own model methods can, too.
+
+     * If your find() operation fails to match any records, you will get an empty array.
+
+   - find(ÅelistÅf) returns an indexed array, useful for any place where you would want a list, 
+                    such as for populating input select boxes.
+
+	    $pending = $this->Article->find('list', array(
+	        'conditions' => array('Article.status' => 'pending')
+	    ));
+
+     The results of a call to find('list') will be in the following form:
+
+	Array
+	(
+	    //[id] => 'displayValue',
+	    [1] => 'displayValue1',
+	    [2] => 'displayValue2',
+	    [4] => 'displayValue4',
+	    [5] => 'displayValue5',
+	    [6] => 'displayValue6',
+	    [3] => 'displayValue3',
+	)
+
+
+- Model::field(string $name, array $conditions = null, string $order = null)
+
+  Returns the value of a single field, specified as $name, from the first record matched by $conditions as ordered by $order. 
+  If no conditions are passed and the model id is set, it will return the field value for the current model result. 
+  If no matching record is found, it returns false.
+
+
+- Model::read($fields, $id)
+ 
+ is a method used to set the current model data (Model::$data) such as during edits but it can also be used in other circumstances 
+ to retrieve a single record from the database.
+
+ parameters:
+
+	$fields is used to pass a single field name, as a string, or an array of field names; 
+                if left empty, all fields will be fetched.
+
+	$id specifies the ID of the record to be read. By default, the currently selected record, 
+            as specified by Model::$id, is used. Passing a different value to $id             will cause that record to be selected.
+
+
+
+--------------------------------------------------------------------------------------
+
+
+------Saving Your Data----------------------------------------------------------------
+
+
+
+Model::save()
+
+ - example of a controller action that uses a CakePHP model to save 
+   data to a database table:
+
+	public function edit($id) {
+	    // Has any form data been POSTed?
+	    if ($this->request->is('post')) {
+	        // If the form data can be validated and saved...
+	        if ($this->Recipe->save($this->request->data)) {
+	            // Set a session flash message and redirect.
+	            $this->Session->setFlash('Recipe Saved!');
+	            return $this->redirect('/recipes');
+	        }
+	    }
+
+	    // If no form data, find the recipe to be edited
+	    // and hand it to the view.
+	    $this->set('recipe', $this->Recipe->findById($id));
+	}
+
+    When save is called, the data passed to it in the first parameter is validated using CakePHPÅfs validation mechanism
+
+	if ($this->Recipe->save($this->request->data)) {
+	    // handle the success.
+	}
+	debug($this->Recipe->validationErrors);
+
+
+Model::save(array $data = null, boolean $validate = true, array $fieldList = array())
+
+ - This method saves array-formatted data. The second parameter allows you to sidestep validation, and the third allows you to 
+   supply a list of model fields to be saved. For added security, you can limit the saved fields to those listed in $fieldList.
+   
+   * If $fieldList is not supplied, a malicious user can add additional fields to the form data (if you are not using SecurityComponent), 
+     and by this change fields that were not originally intended to be changed.
+
+   The save method also has an alternate syntax:
+
+	save(array $data = null, array $params = array())
+
+      * $params array can have any of the following available options as keys:
+
+		validate Set to true/false to enable/disable validation.
+
+        	fieldList An array of fields you want to allow for saving.
+
+        	callbacks Set to false to disable callbacks. Using ÅebeforeÅf or ÅeafterÅf will enable only those callbacks.
+
+		counterCache (since 2.4) Boolean to control updating of counter caches (if any)
+
+		atomic (since 2.6) Boolean to indicate you want records saved in a transaction.
+
+
+
+
+
+
+Model::set($one, $two = null)    //update fields
+
+ - Model::set() can be used to set one or many fields of data to the data array inside a model. This is useful when using models with 
+   the ActiveRecord features offered by Model:
+
+	$this->Post->read(null, 1);
+	$this->Post->set('title', 'New title for the article');
+	$this->Post->save();
+
+   Is an example of how you can use set() to update single fields, in an ActiveRecord approach. 
+   You can also use set() to assign new values to multiple fields:
+
+	$this->Post->read(null, 1);
+	$this->Post->set(array(
+	    'title' => 'New title',
+	    'published' => false
+	));
+	$this->Post->save();
+
+   The above would update the title and published fields and save the record to the database.
+
+	
+Model::clear()
+
+ - This method can be used to reset model state and clear out any unsaved data and validation errors.
+
+
+   Creating or updating is controlled by the modelÅfs id field. If $Model->id is set, 
+   the record with this primary key is updated. Otherwise a new record is created:
+
+	// Create: id isn't set or is null
+	$this->Recipe->create();
+	$this->Recipe->save($this->request->data);
+
+	// Update: id is set to a numerical value
+	$this->Recipe->id = 2;
+	$this->Recipe->save($this->request->data);
+
+     * Note: When calling save in a loop, donÅft forget to call clear().
+
+
+  If you want to update a value, rather than create a new one, make sure you are passing the primary 
+  key field into the data array:
+
+	$data = array('id' => 10, 'title' => 'My new title');
+	// This will update Recipe with id 10
+	$this->Recipe->save($data);
+
+
+Model::create(array $data = array())
+
+ - This method resets the model state for saving new information. It does not actually create a record in the database but 
+   clears Model::$id and sets Model::$data based on your database field defaults. If you have not defined defaults for your 
+   database fields, Model::$data will be set to an empty array.
+
+
+   If the $data parameter (using the array format outlined above) is passed, it will be merged with the database field defaults 
+   and the model instance will be ready to save with that data (accessible at $this->data).
+
+   If false or null are passed for the $data parameter, Model::$data will be set to an empty array.
+
+   Note: If you want to insert a new row instead of updating an existing one you should always call create() first. 
+         This avoids conflicts with possible prior save calls in callbacks or other places.
+
+
+--------------------------------------------------------------------------------------
+
+
+
+------Deleting Data-------------------------------------------------------------------
+
+
+delete(integer $id = null, boolean $cascade = true);
+
+  - Deletes the record identified by $id. By default, also deletes records dependent on the record specified to be deleted.
+
+	$this->Comment->delete($this->request->data('Comment.id'));
+
+    For example, when deleting a User record that is tied to many Recipe records 
+    (User ÅehasManyÅf or ÅehasAndBelongsToManyÅf Recipes):
+
+	* if $cascade is set to true, the related Recipe records are also deleted if the modelÅfs dependent-value is set to true.
+        * if $cascade is set to false, the Recipe records will remain after the User has been deleted.
+
+
+   If your database supports foreign keys and cascading deletes, 
+   itÅfs often more efficient to rely on that feature than CakePHPÅfs cascading.
+
+
+deleteAll(mixed $conditions, $cascade = true, $callbacks = false)
+
+  - deleteAll() is similar to delete(), except that deleteAll() will delete all records that match the supplied conditions. 
+    The $conditions array should be supplied as a SQL fragment or array.
+
+	Params:
+
+		* conditions Conditions to match
+		* cascade Boolean, Set to true to delete records that depend on this record
+		* callbacks Boolean, Run callbacks
+	
+	Return boolean True on success, false on failure.
+	Ex:
+
+	// Delete with array conditions similar to find()
+	$this->Comment->deleteAll(array('Comment.spam' => true), false);
+	
+
+
+
+
+
+--------------------------------------------------------------------------------------
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+-------------CONTROLLER------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+$this->request->is() = takes a single argument, which can be the request METHOD (get, put, post, delete) or 
+                       some request identifier (ajax).
+
+$this->request->data = if user uses a form to POST data to your application, that information is 
+                       available in $this->request->data
+
+
+--------- include the FlashComponent - and FlashHelper at controller:------------
+	    public $helpers = array('Html', 'Form', 'Flash');
+   	    public $components = array('Flash');
+
+
+FlashComponent::success() = method to set a message to a session variable to be displayed on the page after redirection
+                       on view: FlashHelper::render()
+---------------------------------------------------------------------------------
+$this->redirect(array('action' => 'index')) = redirects to another URL. The param array('action' => 'index') translates to URL /posts 
+                                              (that is, the index action of the posts controller  if the code is in PostsController.php).
+
+---------------------------------------------------------------------------------
+
+
+---------Controller Attributes---------------------------------------------------
+
+* for complete list, http://api.cakephp.org/2.8/class-Controller.html
+
+- Controller::$name = The $name attribute should be set to the name of the controller. Usually this is just the plural form of 
+			       the primary model the controller uses. This property can be omitted, 
+                               but saves CakePHP from inflecting it:
+
+				// $name controller attribute usage example
+				class RecipesController extends AppController {
+				   public $name = 'Recipes';
+				}
+
+- $components, $helpers and $uses
+
+   - Controller::$uses       = Controllers have access to their primary model available by default. 
+			       Our RecipesController will have the Recipe model class available at 			 
+		               $this->Recipe, and our ProductsController also features the Product model at $this->Product. 
+			       However, when allowing a controller to access additional models through the $uses variable, 
+			       the name of the current controllerÅfs model must also be included. 
+  
+                               If you do not wish to use a Model in your controller, set public $uses = array(). 
+                               This will allow you to use a controller without a need for a corresponding Model file.
+
+
+   - Controller::$helpers    = The HtmlHelper, FormHelper, and SessionHelper are available by default, as is the SessionComponent. 
+                               But if you choose to define your own $helpers array in AppController, make sure to include HtmlHelper 
+                               and FormHelper if you want them still available by default in your Controllers.
+
+
+
+   - Controller::$components = The components array allows you to set which Components a controller will use. 
+                               Like $helpers and $uses components in your controllers are merged with those in AppController. 
+                               As with $helpers you can pass settings into $components.
+
+Ex:
+
+	class RecipesController extends AppController {
+	    public $uses = array('Recipe', 'User');
+	    public $helpers = array('Js');
+	    public $components = array('RequestHandler');
+	}
+
+ * Each of these variables are merged with their inherited values, therefore it is not necessary (for example) to 
+   redeclare the FormHelper, or anything that is declared in your AppController.
+
+
+---------------------------------------------------------------------------------
+
+
+
+
+---------Request Life-cycle callbacks-------------------------------------------
+
+- Controller::beforeFilter() = This function is executed before every action in the controller. 
+                               ItÅfs a handy place to check for an active session or inspect user permissions.
+
+- Controller::beforeRender() = Called after controller action logic, but before the view is rendered. 
+                               This callback is not used often, but may be needed if you are calling render() manually before the 
+                               end of a given action.
+
+- Controller::afterFilter()  = Called after every controller action, and after rendering is complete. 
+                               This is the last controller method to run.
+
+---------------------------------------------------------------------------------
+
+---------Callbacks---------------------------------------------------------------
+
+In addition to the Request Life-cycle callbacks, CakePHP also supports callbacks related to scaffolding.
+
+- Controller::beforeScaffold($method)         = $method name of method called example index, edit, etc.
+
+- Controller::afterScaffoldSave($method)      = $method name of method called either edit or update.
+
+- Controller::afterScaffoldSaveError($method) = $method name of method called either edit or update.
+
+- Controller::scaffoldError($method)          = $method name of method called example index, edit, etc.
+
+
+---------------------------------------------------------------------------------
+
+
+
+
+---------Interacting with Views--------------------------------------------------
+
+Controller::set(string $var, mixed $value) = The set() method is the main way to send data from your controller to your view. 
+                                             Once youÅfve used set(), the variable can be accessed in your view:
+
+						// First you pass data from the controller:
+
+						$this->set('color', 'pink');
+
+
+						// Then, in the view, you can utilize the data:
+
+						?>
+
+						You have selected <?php echo $color; ?> icing for the cake.
+
+
+						The set() method also takes an associative array as its first parameter. 
+						This can often be a quick way to assign a set of information to the view:
+
+
+						$data = array(
+    							'color' => 'pink',
+    							'type' => 'sugar',
+    							'base_price' => 23.95
+						);
+
+						// make $color, $type, and $base_price
+						// available to the view:
+
+						$this->set($data);
+
+Controller::render(string $view, string $layout) = The render() method is automatically called at the end of each requested 
+                                                   controller action. This method performs all the view logic (using the data 
+                                                   youÅfve submitted using the set() method), places the view inside its $layout, 
+                                                   and serves it back to the end user.
+
+
+						The default view file used by render is determined by convention. 
+                                                If the search() action of the RecipesController is requested, 
+                                                the view file in /app/View/Recipes/search.ctp will be rendered:
+
+						class RecipesController extends AppController {
+						// ...
+    							public function search() {
+        							// Render the view in /View/Recipes/search.ctp
+        							$this->render();
+    							}
+						// ...
+						}
+
+						In your controller, you may want to render a different view than the 
+						conventional one. You can do this by calling render() directly. 
+						Once you have called render(), CakePHP will not try to re-render the view:
+						
+						class PostsController extends AppController {
+    							public function my_action() {
+        							$this->render('custom_file');
+    							}
+						}
+						// This would render app/View/Posts/custom_file.ctp instead of app/View/Posts/my_action.ctp
+
+
+						You can also render views inside plugins using the following syntax: 
+							$this->render('PluginName.PluginController/custom_file').
+
+						For example:
+
+							class PostsController extends AppController {
+    								public function my_action() {
+        								$this->render('Users.UserDetails/custom_file');
+    								}
+							}
+						// This would render app/Plugin/Users/View/UserDetails/custom_file.ctp
+
+
+---------------------------------------------------------------------------------
+
+
+---------Flow control------------------------------------------------------------
+
+Controller::redirect(mixed $url, integer $status, boolean $exit)  = takes its first parameter in the form of a CakePHP-relative URL.
+								    When a user has successfully placed an order, 
+								    you might wish to redirect them to a receipt screen.
+
+								    if ($success) {
+        								return $this->redirect(
+            									array('controller' => 'orders', 'action' => 'thanks')
+        								);
+    								    }
+
+								    You can also use a relative or absolute URL as the $url argument:
+									$this->redirect('/orders/thanks');
+									$this->redirect('http://www.example.com');
+
+							            You can also pass data to the action:
+									$this->redirect(array('action' => 'edit', $id));
+
+								    If you need to redirect to the referer page you can use:
+									$this->redirect($this->referer());
+
+								    The method also supports name-based parameters. If you want to 
+								    redirect to a URL like: 
+								    http://www.example.com/orders/confirm/product:pizza/quantity:5 
+								    you can use:
+
+									$this->redirect(array(
+									    'controller' => 'orders',
+									    'action' => 'confirm',
+									    'product' => 'pizza',
+									    'quantity' => 5)
+									);
+
+								    An example using query strings and hash would look like:
+
+									$this->redirect(array(
+									    'controller' => 'orders',
+									    'action' => 'confirm',
+									    '?' => array(
+								            'product' => 'pizza',
+								            'quantity' => 5
+									    ),
+									    '#' => 'top')
+								        );
+
+								    The generated URL would be:
+									
+									http://www.example.com/orders/confirm?product=pizza&quantity=5#top
+
+
+
+Controller::flash(string $message, string|array $url, integer $pause, string $layout) = Like redirect(), the flash() method is used to direct 
+											a user to a new page after an operation. The flash() 
+											method is different in that it shows a message before 
+											passing the user on to another URL.
+
+											The first parameter should hold the message to be displayed, 
+											and the second parameter is a CakePHP-relative URL. 
+											CakePHP will display the $message for $pause seconds before 
+											forwarding the user on.
+
+											If thereÅfs a particular template youÅfd like your flashed message 
+											to use, you may specify the name of that layout in the $layout parameter.
+
+											For in-page flash messages, 
+											be sure to check out SessionComponent::setFlash() method.
+
+
+---------------------------------------------------------------------------------
+
+
+
+---------Other Useful Methods----------------------------------------------------
+
+- Controller::constructClasses() 			                  = This method loads the models required by the controller. 
+				                                            This loading process is done by CakePHP normally, 
+				                                            but this method is handy to have when accessing controllers 
+				                                            from a different perspective. 
+				                                            If you need CakePHP in a command-line script or some other outside use, 
+			                                                    constructClasses() may come in handy.
+
+
+
+- Controller::referer(mixed $default = null, boolean $local = false)      = Returns the referring URL for the current request. 
+									    Parameter $default can be used to supply a default URL to use if 
+									    HTTP_REFERER cannot be read from headers. 
+
+									    So, instead of doing this:
+
+									class UserController extends AppController {
+									    public function delete($id) {
+									        // delete code goes here, and then...
+									        if ($this->referer() != '/') {
+									            return $this->redirect($this->referer());
+									        }
+									        return $this->redirect(array('action' => 'index'));
+									    }
+									}
+
+
+									    you can do this:
+
+									class UserController extends AppController {
+									    public function delete($id) {
+									        // delete code goes here, and then...
+									        return $this->redirect(
+									            $this->referer(array('action' => 'index'))
+									        );
+									    }
+									}
+			
+								    //  If $default is not set, the function defaults to the root of your domain - Åe/Åf.
+								    //  Parameter $local if set to true, restricts referring URLs to local server.
+
+
+
+
+
+
+Controller::paginate()
+ -This method is used for paginating results fetched by your models. You can specify page sizes, model find conditions and more. 
+
+
+
+
+
+- Controller::postConditions(array $data, mixed $op, string $bool, boolean $exclusive)
+
+Use this method to turn a set of POSTed model data (from HtmlHelper-compatible inputs) into a set of find conditions for a model. 
+This function offers a quick shortcut on building search logic. For example, an administrative user may want to be able to search 
+orders in order to know which items need to be shipped. You can use CakePHPÅfs FormHelper and HtmlHelper to create a quick form based 
+on the Order model. Then a controller action can use the data posted from that form to craft find conditions:
+
+
+public function index() {
+    $conditions = $this->postConditions($this->request->data);
+    $orders = $this->Order->find('all', compact('conditions'));
+    $this->set('orders', $orders);
+}
+
+
+If $this->request->data['Order']['destination'] equals ÅgOld Towne BakeryÅh, postConditions converts that condition to an array compatible 
+for use in a Model->find() method. In this case, array('Order.destination' => 'Old Towne Bakery').
+
+
+If you want to use a different SQL operator between terms, supply them using the second parameter:
+
+/*
+Contents of $this->request->data
+array(
+    'Order' => array(
+        'num_items' => '4',
+        'referrer' => 'Ye Olde'
+    )
+)
+*/
+
+// Let's get orders that have at least 4 items and contain 'Ye Olde'
+$conditions = $this->postConditions(
+    $this->request->data,
+    array(
+        'num_items' => '>=',
+        'referrer' => 'LIKE'
+    )
+);
+$orders = $this->Order->find('all', compact('conditions'));
+
+
+* The third parameter allows you to tell CakePHP what SQL boolean operator to use between the find conditions. 
+  Strings like ÅeANDÅf, ÅeORÅf and ÅeXORÅf are all valid values.
+
+* Finally, if the last parameter is set to true, and the $op parameter is an array, 
+  fields not included in $op will not be included in the returned conditions.
+
+
+
+Controller::requestAction(string $url, array $options)
+
+- This function calls a controllerÅfs action from any location and returns data from the action. 
+  The $url passed is a CakePHP-relative URL (/controllername/actionname/params). 
+  To pass extra data to the receiving controller action add to the $options array.
+
+
+Controller::loadModel(string $modelClass, mixed $id)
+
+- The loadModel() function comes handy when you need to use a model which is not the controllerÅfs default model 
+  or its associated model:
+
+	$this->loadModel('Article');
+	$recentArticles = $this->Article->find(
+	    'all',
+	    array('limit' => 5, 'order' => 'Article.created DESC')
+	);
+	
+	$this->loadModel('User', 2);
+	$user = $this->User->read();
+
+---------------------------------------------------------------------------------
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+------------View-------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+The view layer in CakePHP can be made up of a number of different parts.
+
+ - views:       Views are the part of the page that is unique to the action being run. They form the meat of your applicationÅfs response.
+
+ - elements:    smaller, reusable bits of view code. Elements are usually rendered inside views.
+
+ - layouts:     view files that contain presentational code that wraps many interfaces in your application. Most views are rendered inside a layout.
+
+ - helpers:     these classes encapsulate view logic that is needed in many places in the view layer. 
+                Among other things, helpers in CakePHP can help you build forms, build AJAX functionality, 
+                paginate model data, or serve RSS feeds.
+
+
+---Extending Views
+
+// app/View/Common/view.ctp
+<h1><?php echo $this->fetch('title'); ?></h1>
+<?php echo $this->fetch('content'); ?>
+
+<div class="actions">
+    <h3>Related actions</h3>
+    <ul>
+    <?php echo $this->fetch('sidebar'); ?>
+    </ul>
+</div>
+
+
+ - The above view file could be used as a parent view. It expects that the view extending it will define the sidebar and title blocks. 
+   The content block is a special block that CakePHP creates. It will contain all the uncaptured content from the extending view. 
+   Assuming our view file has a $post variable with the data about our post, the view could look like:
+
+
+<?php
+// app/View/Posts/view.ctp
+$this->extend('/Common/view');
+
+$this->assign('title', $post);
+
+$this->start('sidebar');
+?>
+<li>
+<?php
+echo $this->Html->link('edit', array(
+    'action' => 'edit',
+    $post['Post']['id']
+)); ?>
+</li>
+<?php $this->end(); ?>
+
+// The remaining content will be available as the 'content' block
+// in the parent view.
+<?php echo h($post['Post']['body']);
+
+
+ - The post view above shows how you can extend a view, and populate a set of blocks. 
+   Any content not already in a defined block will be captured and put into a special block named content.
+
+ * You should avoid using content as a block name in your application. CakePHP uses this for uncaptured content in extended views.
+
+
+
+
+---Using view blocks
+
+ - View blocks replace $scripts_for_layout and provide a flexible API that allows you to define slots or blocks in 
+   your views/layouts that will be defined elsewhere. For example, blocks are ideal for implementing things such as 
+   sidebars, or regions to load assets at the bottom/top of the layout. Blocks can be defined in two ways: either as a capturing block, 
+   or by direct assignment. The start(), append() and end() methods allow you to work with capturing blocks:
+
+	// Create the sidebar block.
+	$this->start('sidebar');
+	echo $this->element('sidebar/recent_topics');
+	echo $this->element('sidebar/recent_comments');
+	$this->end();
+
+
+	// Append into the sidebar later on.
+	$this->append('sidebar');
+	echo $this->element('sidebar/popular_topics');
+	$this->end();
+
+
+ - You can also append into a block using start() multiple times. assign() can be used to clear or overwrite a block at any time:
+
+	// Clear the previous content from the sidebar block.
+	$this->assign('sidebar', '');
+
+ - In 2.3, a few new methods were added for working with blocks. The prepend() method was added to prepend content to an existing block:
+
+	// Prepend to sidebar
+	$this->prepend('sidebar', 'this content goes on top of sidebar');
+
+
+ - The method startIfEmpty() can be used to start a block only if it is empty or undefined. If the block already exists, 
+   the captured content will be discarded. This is useful when you want to conditionally define default content for a block if it 
+   does not already exist:
+
+	// In a view file.
+	// Create a navbar block
+	$this->startIfEmpty('navbar');
+	echo $this->element('navbar');
+	echo $this->element('notifications');
+	$this->end();
+
+
+	// In a parent view/layout
+	<?php $this->startIfEmpty('navbar'); ?>
+	<p>If the block is not defined by now - show this instead</p>
+	<?php $this->end(); ?>
+
+	// Somewhere later in the parent view/layout
+	echo $this->fetch('navbar');
+
+    * In the above example, the navbar block will only contain the content added in the first section. 
+      Since the block was defined in the child view, the default content with the <p> tag will be discarded.
+
+
+ 
+---Displaying blocks
+
+ - You can display blocks using the fetch() method. fetch() will safely output a block, returning ÅeÅf if a block does not exist:
+
+	echo $this->fetch('sidebar');
+
+ - You can also use fetch to conditionally show content that should surround a block should it exist. 
+   This is helpful in layouts, or extended views where you want to conditionally show headings or other markup:
+
+	// In app/View/Layouts/default.ctp
+	<?php if ($this->fetch('menu')): ?>
+	<div class="menu">
+	    <h3>Menu options</h3>
+	    <?php echo $this->fetch('menu'); ?>
+	</div>
+	<?php endif; ?>
+
+ - As of 2.3.0, you can also provide a default value for a block should it not have any content. 
+   This allows you to easily add placeholder content for empty states. You can provide a default value using the second argument:
+
+	<div class="shopping-cart">
+	    <h3>Your Cart</h3>
+	    <?php echo $this->fetch('cart', 'Your cart is empty'); ?>
+	</div>
+
+
+---Using blocks for script and CSS files
+
+ - Blocks replace the deprecated $scripts_for_layout layout variable. Instead you should use blocks. 
+   The HtmlHelper ties into view blocks, and its script(), css(), and meta() methods each update a block with 
+   the same name when used with the inline = false option:
+
+<?php
+// In your view file
+$this->Html->script('carousel', array('inline' => false));
+$this->Html->css('carousel', array('inline' => false));
+?>
+
+// In your layout file.
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <title><?php echo $this->fetch('title'); ?></title>
+    <?php echo $this->fetch('script'); ?>
+    <?php echo $this->fetch('css'); ?>
+    </head>
+    // Rest of the layout follows
+
+
+ - The HtmlHelper also allows you to control which block the scripts and CSS go to:
+
+	// In your view
+	$this->Html->script('carousel', array('block' => 'scriptBottom'));
+
+	// In your layout
+	echo $this->fetch('scriptBottom');
+
+
+
+---Layouts
+
+ - A layout contains presentation code that wraps around a view. Anything you want to see in all of your views should be placed in a layout.
+   CakePHPÅfs default layout is located at /app/View/Layouts/default.ctp
+   When you create a layout, you need to tell CakePHP where to place the output of your views. 
+   To do so, make sure your layout includes a place for $this->fetch('content')
+
+ - You can create as many layouts as you wish: just place them in the app/View/Layouts directory, 
+   and switch between them inside of your controller actions using the controller or viewÅfs $layout property:
+
+	// From a controller
+	public function admin_view() {
+	    // Stuff
+	    $this->layout = 'admin';
+	}
+
+	// From a view file
+	$this->layout = 'loggedin';
+
+ - For example, if a section of my site included a smaller ad banner space, I might create a new layout with the smaller 
+   advertising space and specify it as the layout for all controllersÅf actions using something like:
+
+ 
+	class UsersController extends AppController {
+	    public function view_active() {
+	        $this->set('title_for_layout', 'View Active Users');
+	        $this->layout = 'default_small_ad';
+	    }
+
+	    public function view_image() {
+	        $this->layout = 'image';
+	        // Output user image
+	    }
+	}
+
+
+ * CakePHP features two core layouts (besides CakePHPÅfs default layout) you can use in your own application: ÅeajaxÅf and ÅeflashÅf. 
+   The Ajax layout is handy for crafting AJAX responses - itÅfs an empty layout. (Most AJAX calls only require a bit of markup in return, 
+   rather than a fully-rendered interface.) The flash layout is used for messages shown by Controller::flash() method.
+  
+   Three other layouts, xml, js, and rss, exist in the core for a quick and easy way to serve up content that isnÅft text/html.
+
+
+
+---Elements (Layouts)
+
+ - Many applications have small blocks of presentation code that need to be repeated from page to page, 
+   sometimes in different places in the layout. CakePHP can help you repeat parts of your website that need to be reused. 
+   These reusable parts are called Elements. Ads, help boxes, navigational controls, extra menus, login forms, and 
+   callouts are often implemented in CakePHP as elements. 
+   An element is basically a mini-view that can be included in other views, in layouts, and even within other elements. 
+   Elements can be used to make a view more readable, placing the rendering of repeating elements in its own file. 
+   They can also help you re-use content fragments in your application.
+
+   Elements live in the /app/View/Elements/ folder, and have the .ctp filename extension.
+   They are output using the element method of the view:
+
+	echo $this->element('helpbox');
+
+
+--Passing Variables into an Element
+
+ - You can pass data to an element through the elementÅfs second argument:
+
+	echo $this->element('helpbox', array(
+	    "helptext" => "Oh, this text is very helpful."
+	));
+
+
+	// Inside app/View/Elements/helpbox.ctp
+	echo $helptext; // Outputs "Oh, this text is very helpful."
+
+
+ - Ex:
+	- In your controller add something like the following for the Post example:
+
+	class PostsController extends AppController {
+	    // ...
+	    public function index() {
+	        $posts = $this->paginate();
+	        if ($this->request->is('requested')) {
+	            return $posts;
+	        }
+	        $this->set('posts', $posts);
+	    }
+	}
+
+	- And then in the element we can access the paginated posts model. 
+          To get the latest five posts in an ordered list, we would do something like the following:
+
+	<h2>Latest Posts</h2>
+	<?php
+	  $posts = $this->requestAction(
+	    'posts/index/sort:created/direction:asc/limit:5'
+	  );
+	?>
+	<ol>
+	<?php foreach ($posts as $post): ?>
+	      <li><?php echo $post['Post']['title']; ?></li>
+	<?php endforeach; ?>
+	</ol>
+
+
+---View API
+  
+ - View methods are accessible in all view, element and layout files. To call any view method use $this->method()
+
+
+--View::set(string $var, mixed $value)
+
+ - Views have a set() method that is analogous to the set() found in Controller objects. 
+   Using set() from your view file will add the variables to the layout and elements that will be rendered later. 
+   
+   In your view file you can do:
+
+	$this->set('activeMenuButton', 'posts');
+
+   Then, in your layout, the $activeMenuButton variable will be available and contain the value ÅepostsÅf.
+
+
+--View::get(string $var, $default = null)
+
+ - Gets the value of the viewVar with the name $var.
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+------------View Form--------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+ - app/view/wow/wow.ctp
+
+<h1>Add Post</h1>
+<?php
+echo $this->Form->create('Post');
+echo $this->Form->input('title');
+echo $this->Form->input('body', array('rows' => '3'));
+echo $this->Form->end('Save Post');
+?>
+
+
+$this->Form->create() = generates:
+	
+	<form id="PostAddForm" method="post" action="/posts/add">
+
+        - If create() is called with no parameters supplied, it assumes you are building a form that submits via POST to the current 
+          controllerÅfs  add() action (or edit() action when id is included in the form data)
+
+
+$this->Form->input() =  used to create form elements of the same name.
+                        The first parameter tells CakePHP which field they correspond to, and the second parameter allows you to 
+                         specify a wide array of options
+
+
+
+$this->Form->end() = generates a submit button and ends the form. If a string is supplied as the first parameter to end(), the 
+                     FormHelper outputs a submit button named accordingly along with the closing form tag. 
+
+
+Note: CakePHP will assume that you are editing a model if the ÅeidÅf field is present in the data array. 
+      If no ÅeidÅf is present (look back at our add view), CakePHP will assume that you are inserting a new model when save() is called.
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+--------------Bake-----------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+console\cake bake model Posts    -----> create model named Posts
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
