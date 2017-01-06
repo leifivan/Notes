@@ -9,6 +9,9 @@ AngularJS is distributed as a JavaScript file, and can be added to a web page wi
 AngularJS starts automatically when the web page has loaded.
 
     ng-app directive tells AngularJS that the <div> element is the "owner" of an AngularJS application.
+     * Only one AngularJS application can be auto-bootstrapped per HTML document.
+     * The first ngApp found in the document will be used to define the root element to auto-bootstrap as an application.
+     * http://shrestha-manoj.blogspot.com/2014/06/can-angularjs-have-multiple-ng-app.html  --> ways to have multiple angularjs app
 
     ng-model directive binds the value of the input field to the application variable name.
 
@@ -244,6 +247,26 @@ Functions can Pollute the Global Namespace
 
 
 ===================================================================================================================================
+
+
+
+
+
+
+
+
+
+===================================================================================================================================
+
+
+
+
+
+
+
+
+
+
 
 
 
