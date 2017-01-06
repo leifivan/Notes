@@ -199,6 +199,47 @@ Adding a Directive:
 	</script>
 
 
+Modules and Controllers in Files:
+
+ It is common in AngularJS applications to put the module and the controllers in JavaScript files.
+ In this example, "myApp.js" contains an application module definition, while "myCtrl.js" contains the controller:
+
+	<!DOCTYPE html>
+	<html>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+		<body>
+
+			<div ng-app="myApp" ng-controller="myCtrl">
+				{{ firstName + " " + lastName }}
+			</div>
+
+			<script src="myApp.js"></script>
+			<script src="myCtrl.js"></script>
+
+		</body>
+	</html>
+
+
+
+	myApp.js:
+
+		var app = angular.module("myApp", []);
+
+	myCtrl.js:
+
+		app.controller("myCtrl", function($scope) {
+    			$scope.firstName = "John";
+    			$scope.lastName= "Doe";
+		});
+
+
+Functions can Pollute the Global Namespace
+  Global functions should be avoided in JavaScript. They can easily be overwritten or destroyed by other scripts.
+  AngularJS modules reduces this problem, by keeping all functions local to the module.
+
+
+  *Note: it is recommended to load the AngularJs library in the <head> or at the start of the <body>
+         this is because "angular.module" can only be compiled after the library has been loaded.
 
 
 
