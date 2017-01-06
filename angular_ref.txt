@@ -1,0 +1,209 @@
+AngularJS is a JavaScript framework.
+
+AngularJS is distributed as a JavaScript file, and can be added to a web page with a script tag:
+
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+===================================================================================================================================
+
+AngularJS starts automatically when the web page has loaded.
+
+    ng-app directive tells AngularJS that the <div> element is the "owner" of an AngularJS application.
+
+    ng-model directive binds the value of the input field to the application variable name.
+
+    ng-bind directive binds the innerHTML of the <p> element to the application variable name.
+
+Ex:
+
+	<!DOCTYPE html>
+	<html>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+	<body>
+
+		<div ng-app="">
+		  <p>Name: <input type="text" ng-model="name"></p>
+		  <p ng-bind="name"></p>
+		</div>
+
+	</body>
+	</html>
+
+
+
+    ng-init directive initializes AngularJS application variables.
+
+
+Ex:
+
+
+	<div ng-app="" ng-init="firstName='John'">
+
+            <p>The name is <span ng-bind="firstName"></span></p>
+
+	</div>
+
+
+   Alternatively with valid HTML:
+
+	<div data-ng-app="" data-ng-init="firstName='John'">
+
+            <p>The name is <span data-ng-bind="firstName"></span></p>
+
+	</div>
+
+===================================================================================================================================
+
+AngularJS expressions are written inside double braces: {{ expression }}.
+
+
+Ex:
+
+	<div ng-app="">
+  		<p>My first expression: {{ 5 + 5 }}</p>
+	</div>
+
+
+
+   AngularJS expressions bind AngularJS data to HTML the same way as the ng-bind directive:
+
+	<div ng-app="">
+  		<p>Name: <input type="text" ng-model="name"></p>
+  		<p>{{name}}</p>
+	</div>
+
+===================================================================================================================================
+
+AngularJS Expressions
+
+	AngularJS expressions can be written inside double braces: {{ expression }}.
+
+	AngularJS expressions can also be written inside a directive: ng-bind="expression".
+
+
+You can write expressions wherever you like, AngularJS will simply resolve the expression and return the result.
+
+Example: Let AngularJS change the value of CSS properties:
+
+	<div ng-app="" ng-init="myCol='lightblue'">
+
+		<input style="background-color:{{myCol}}" ng-model="myCol" value="{{myCol}}">
+
+	</div>
+
+
+
+
+AngularJS Numbers:
+
+	<div ng-app="" ng-init="quantity=1;cost=5">
+
+		<p>Total in dollar: {{ quantity * cost }}</p>
+
+	</div>
+
+
+AngularJS Strings:
+
+	<div ng-app="" ng-init="firstName='John';lastName='Doe'">
+
+		<p>The name is {{ firstName + " " + lastName }}</p>
+
+	</div>
+
+        using ng-bind:
+
+	<div ng-app="" ng-init="firstName='John';lastName='Doe'">
+
+		<p>The name is <span ng-bind="firstName + ' ' + lastName"></span></p>
+
+	</div>
+
+
+AngularJS Objects:
+
+	<div ng-app="" ng-init="person={firstName:'John',lastName:'Doe'}">
+
+		<p>The name is {{ person.lastName }}</p>
+
+	</div>
+
+
+
+AngularJS Arrays:
+
+
+	<div ng-app="" ng-init="points=[1,15,19,2,40]">
+
+		<p>The third result is {{ points[2] }}</p>
+
+	</div>
+
+===================================================================================================================================
+
+AngularJS Modules
+
+ - An AngularJS module defines an application.
+ - The module is a container for the different parts of an application.
+ - The module is a container for the application controllers.
+ - Controllers always belong to a module.
+
+
+Creating a Module:
+
+	<div ng-app="myApp">...</div>
+
+	<script>
+		var app = angular.module("myApp", []); 
+	</script>
+
+ - The "myApp" parameter refers to an HTML element in which the application will run.
+ - Now you can add controllers, directives, filters, and more, to your AngularJS application.
+
+
+Adding a Controller:
+
+ Add a controller to your application, and refer to the controller with the ng-controller directive:
+
+	<div ng-app="myApp" ng-controller="myCtrl">
+		{{ firstName + " " + lastName }}
+	</div>
+
+	<script>
+
+		var app = angular.module("myApp", []);
+
+		app.controller("myCtrl", function($scope) {
+    			$scope.firstName = "John";
+    			$scope.lastName = "Doe";
+		});
+
+	</script>
+
+
+Adding a Directive:
+
+ AngularJS has a set of built-in directives which you can use to add functionality to your application.
+ In addition you can use the module to add your own directives to your applications:
+
+	<div ng-app="myApp" w3-test-directive></div>
+
+	<script> 
+		var app = angular.module("myApp", []);
+
+		app.directive("w3TestDirective", function() {
+    			return {
+        			template : "I was made in a directive constructor!"
+    			};
+		});
+	</script>
+
+
+
+
+
+===================================================================================================================================
+
+
+
+

@@ -3,7 +3,11 @@ STOPPED AT 17
 
 -------------Install via composer--------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------------
- composer create-project --prefer-dist cakephp/cakephp:"~2.0" app_name
+ composer create-project --prefer-dist cakephp/cakephp:"~2.0" app_name                  --> version 2.9
+
+ composer create-project --prefer-dist cakephp/app my_app_name                          --> latest version (uncomment the "extension=php_intl.dll" on xampp/php/php.init)
+
+-----for ver 2.9
 
  - change value of APP/Config/core.php( Security.salt and security.cipherseed )
 
@@ -36,6 +40,11 @@ STOPPED AT 17
 		<?php echo $this->element('sql_dump'); ?>
 
         6. cd project_folder/app/ then run: composer update
+
+
+-----for ver 3.3
+
+	php bin/cake.php server   -->run server
 
 
 -----------------------------------------------------------------------------------------------------------------------------------------
@@ -454,7 +463,7 @@ $this->Html->link() -  will generate an HTML link with the given title (the firs
 	    public $belongsTo = array(
 	        'User' => array(
 	            'className' => 'User',
-	            'foreignKey' => 'user_id'
+	            l
 	        )
 	    );
 	}
