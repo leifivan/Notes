@@ -60,3 +60,10 @@ git add README
 git commit -m 'first commit'
 git remote add origin .....
 git push origin master
+
+----------------------------------------------------------------------------------------------------------
+Git stash
+
+git stash     - Use git stash when you want to record the current state of the working directory and the index
+
+git stash pop - git stash pop to apply the stash and then immediately drop it from your stack.
