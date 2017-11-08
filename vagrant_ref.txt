@@ -1,0 +1,189 @@
+------------mysql service-----------------------------------------------------------------------
+
+### To start ###
+service mysqld start
+# OR
+/etc/init.d/mysqld start
+ 
+### To stop ###
+service mysqld stop
+# OR
+/etc/init.d/mysqld stop
+ 
+### To restart ###
+sudo service mysqld restart
+# OR
+/etc/init.d/mysqld restart
+
+--------------------------------------------------------------------------------------------------
+
+login_id: ynsadmin
+password: 00000000
+
+'SELECT no FROM gift_cards WHERE gift_cards.order_detail_id = OrderDetail.id AND gift_cards.customer_id = Order.customer_id'
+--------------------------------------------------------------------------------------------------
+UPDATE MYSQL database schema (Riraku)
+
+vagrant ssh
+cd /var/www/html
+php app/Console/cake.php schema update -y
+
+
+aco sync
+cd /var/www/html
+php app/Console/cake.php AclExtras.AclExtras aco_sync
+
+
+RUN TEST CASES
+cd /var/www/html
+php app/Console/cake.php test app Controller/Component/OrderComputeComponentSetPrioritiesOfOrderDetail
+
+
+Execute batch file
+php Console/cake.php IFPointHistory
+
+  ****where IFPointHistory is the batch file
+
+RESTART/STOP/START MYSQL SERVICE
+/etc/init.d/mysqld restart / stop / start
+
+
+
+        ini_set('display_errors', 1);
+        error_reporting(E_ALL);
+
+
+
+printer
+ function connect(transports)
+
+-------Check centos version--------------------------------------
+  rpm --query centos-release
+  centos-release-6-7.el6.centos.12.3.x86_64
+-----------------------------------------------------------------
+
+
+-------To check apache modules installed on your system----------
+  apache2ctl -M or apachectl -M
+-----------------------------------------------------------------
+
+-------To check Apache version-----------------------------------
+
+/usr/sbin/httpd -v
+    Server version: Apache/2.2.15 (Unix)
+    Server built:   Jul 12 2017 13:32:34
+
+rpm -q httpd
+    httpd-2.2.15-60.el6.centos.4.x86_64
+
+-----------------------------------------------------------------
+
+
+-------To check if OpenSSL is installed in your system-----------
+  rpm -qa | grep -i openssl
+  
+             openssl-1.0.1e-42.el6.x86_64
+-----------------------------------------------------------------
+
+-------Check mod_ssl version-------------------------------------
+rpm -q mod_ssl
+    mod_ssl-2.2.15-60.el6.centos.4.x86_64
+-----------------------------------------------------------------
+
+
+
+quit vim without saving any changes
+  q!
+
+
+
+
+
+
+
+------------------------config
+vi /etc/httpd/conf/httpd.conf
+
+
+
+
+
+<VirtualHost *:80>
+    ServerAdmin root@linuxlab.local
+    ServerName local.rirakupos.admin
+    DocumentRoot /var/www/html/app/webroot
+    EnableMMAP Off
+    EnableSendfile Off
+</VirtualHost>
+
+
+CentOS/RHEL (Red Hat) Linux version 4.x/5.x/6.x or older specific commands
+
+## Start ##
+service httpd start
+## Stop ##
+service httpd stop
+## Restart ##
+service httpd restart
+
+
+
+======================================================================================================
+ Package                Arch              Version                             Repository          Size
+======================================================================================================
+Updating:
+ mod_ssl                x86_64            1:2.2.15-60.el6.centos.4            updates             98 k
+ openssl                x86_64            1.0.1e-57.el6                       base               1.5 M
+Updating for dependencies:
+ httpd                  x86_64            2.2.15-60.el6.centos.4              updates            839 k
+ httpd-tools            x86_64            2.2.15-60.el6.centos.4              updates             80 k
+
+Transaction Summary
+======================================================================================================
+
+
+
+
+
+=============================================
+//remove directories & content
+rm -r mydir 
+
+//vim /etc/httpd/conf.d/ssl.conf (turn on/off ssl)
+SSLEngine off
+
+//httpd error_log
+sudo vi /etc/httpd/logs/error_log
+=============================================
+
+
+
+
+
+
+
+How to make IE8 trust a self-signed certificate in 20 irritating steps
+
+Browse to the site whose certificate you want to trust.
+When told “There is a problem with this website's security certificate.”, choose “Continue to this website (not recommended).”
+Select Tools --> Internet Options.
+Select Security --> Trusted sites-->Sites.
+Confirm the URL matches, and click “Add” then “Close”.
+Close the “Internet Options” dialog box with either “OK” or “Cancel”.
+Refresh the current page.
+When told “There is a problem with this website's security certificate.”, choose “Continue to this website (not recommended).”
+Click on “Certificate Error” at the right of the address bar and select “View certificates”.
+Click on “Install Certificate...”, then in the wizard, click “Next”.
+On the next page select “Place all certificates in the following store”.
+Click “Browse”, select “Trusted Root Certification Authorities”, and click “OK”.
+Back in the wizard, click “Next”, then “Finish”.
+If you get a “Security Warning” message box, click “Yes”.
+Dismiss the message box with “OK”.
+Select Tools-->Internet Options.
+Select Security-->Trusted sites-->Sites.
+Select the URL you just added, click “Remove”, then “Close”.
+Now shut down all running instances of IE, and start up IE again.
+The site’s certificate should now be trusted.
+
+
+
